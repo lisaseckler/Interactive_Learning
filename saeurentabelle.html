@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Säuren – Lernübung</title>
+<style>
+  :root {
+    --bg: #f0f4f8;
+    --card: #ffffff;
+    --primary: #1a5276;
+    --accent: #2e86c1;
+    --correct: #1e8449;
+    --correct-bg: #d5f5e3;
+    --wrong: #922b21;
+    --wrong-bg: #fce4e4;
+    --prefill: #eaf2ff;
+    --prefill-border: #aed6f1;
+    --border: #c8d6e0;
+    --text: #1c2833;
+    --muted: #7f8c8d;
+    --radius: 10px;
+    --font: 'Segoe UI', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    padding: 24px 16px 48px;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    color: var(--primary);
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  header p {
+    color: var(--muted);
+    margin-top: 6px;
+    font-size: 0.95rem;
+  }
+
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 10px;
+    letter-spacing: 0.4px;
+  }
+
+  /* Table wrapper */
+  .table-wrap {
+    overflow-x: auto;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+  }
+
+  thead th {
+    background: var(--primary);
+    color: #fff;
+    padding: 14px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: left;
+    letter-spacing: 0.3px;
+  }
+
+  thead th:first-child { border-radius: 0; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:nth-child(even) { background: #fafcfe; }
+
+  td {
+    padding: 10px 12px;
+    vertical-align: middle;
+  }
+
+  /* Pre-filled cell */
+  .prefilled {
+    background: var(--prefill);
+    border: 1.5px solid var(--prefill-border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 0.92rem;
+    display: inline-block;
+    min-width: 80px;
+  }
+
+  /* Input cell */
+  .answer-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.92rem;
+    font-family: var(--font);
+    color: var(--text);
+    background: #fff;
+    transition: border-color 0.2s, background 0.2s;
+    outline: none;
+  }
+
+  .answer-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(46,134,193,0.12);
+  }
+
+  .answer-input.correct {
+    border-color: var(--correct);
+    background: var(--correct-bg);
+    color: var(--correct);
+    font-weight: 600;
+  }
+
+  .answer-input.wrong {
+    border-color: var(--wrong);
+    background: var(--wrong-bg);
+    color: var(--wrong);
+  }
+
+  .answer-input:disabled {
+    cursor: default;
+  }
+
+  /* Feedback icon next to input */
+  .cell-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .cell-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  /* Hint (correct answer) shown after wrong */
+  .hint {
+    font-size: 0.78rem;
+    color: var(--wrong);
+    margin-top: 3px;
+    display: none;
+  }
+
+  .hint.show { display: block; }
+
+  .hint strong { font-weight: 600; }
+
+  /* Buttons */
+  .actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+
+  button {
+    padding: 11px 28px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.18s;
+  }
+
+  .btn-submit {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  .btn-submit:hover { background: #154360; border-color: #154360; }
+
+  .btn-reset {
+    background: #fff;
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  .btn-reset:hover { background: var(--prefill); }
+
+  /* Score box */
+  .score-box {
+    display: none;
+    margin-top: 22px;
+    padding: 18px 22px;
+    border-radius: var(--radius);
+    border: 2px solid;
+    text-align: center;
+    font-size: 1rem;
+  }
+
+  .score-box.show { display: block; }
+
+  .score-box.perfect {
+    background: var(--correct-bg);
+    border-color: var(--correct);
+    color: var(--correct);
+  }
+
+  .score-box.partial {
+    background: #fef9e7;
+    border-color: #d4ac0d;
+    color: #7d6608;
+  }
+
+  .score-box.poor {
+    background: var(--wrong-bg);
+    border-color: var(--wrong);
+    color: var(--wrong);
+  }
+
+  .score-box .score-num {
+    font-size: 2rem;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .score-box .score-msg {
+    font-size: 0.93rem;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>⚗️ Säuren – Lernübung</h1>
+    <p>Fülle alle leeren Felder aus und überprüfe deine Antworten.</p>
+    <span class="badge">4 zufällige Säuren aus 16</span>
+  </header>
+
+  <div class="table-wrap">
+    <table id="saeurenTable">
+      <thead>
+        <tr>
+          <th>Name der Säure</th>
+          <th>Summenformel</th>
+          <th>Stark / Schwach</th>
+          <th>Name des Säurerests</th>
+          <th>Summenformel Säurerest</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#aed6f1;border:1px solid #2e86c1"></div>
+      Vorgegeben
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#d5f5e3;border:1px solid #1e8449"></div>
+      Richtig
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#fce4e4;border:1px solid #922b21"></div>
+      Falsch
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-submit" onclick="checkAnswers()">✔ Auswerten</button>
+    <button class="btn-reset" onclick="newRound()">🔄 Neue Säuren</button>
+  </div>
+
+  <div class="score-box" id="scoreBox">
+    <span class="score-num" id="scoreNum"></span>
+    <span class="score-msg" id="scoreMsg"></span>
+  </div>
+
+</div>
+
+<script>
+// ─── Datenbasis: 16 Säuren ─────────────────────────────────────────────────
+const SAEUREN = [
+  { name: "Salzsäure",         formel: "HCl",      staerke: "stark",  restName: "Chlorid-Ion",       restFormel: "Cl⁻"    },
+  { name: "Schwefelsäure",     formel: "H₂SO₄",    staerke: "stark",  restName: "Sulfat-Ion",        restFormel: "SO₄²⁻" },
+  { name: "Salpetersäure",     formel: "HNO₃",     staerke: "stark",  restName: "Nitrat-Ion",        restFormel: "NO₃⁻"  },
+  { name: "Schweflige Säure",  formel: "H₂SO₃",    staerke: "schwach",restName: "Sulfit-Ion",        restFormel: "SO₃²⁻" },
+  { name: "Salpetrige Säure",  formel: "HNO₂",     staerke: "schwach",restName: "Nitrit-Ion",        restFormel: "NO₂⁻"  },
+  { name: "Chlorsäure",        formel: "HClO₃",    staerke: "stark",  restName: "Chlorat-Ion",       restFormel: "ClO₃⁻" },
+  { name: "Bromwasserstoff",   formel: "HBr",      staerke: "stark",  restName: "Bromid-Ion",        restFormel: "Br⁻"   },
+  { name: "Schwefelwasserstoff",formel: "H₂S",     staerke: "schwach",restName: "Sulfid-Ion",        restFormel: "S²⁻"   },
+  { name: "Chlorige Säure",    formel: "HClO₂",    staerke: "schwach",restName: "Chlorit-Ion",       restFormel: "ClO₂⁻" },
+  { name: "Fluorwasserstoff",  formel: "HF",       staerke: "schwach",restName: "Fluorid-Ion",       restFormel: "F⁻"    },
+  { name: "Iodwasserstoff",    formel: "HI",       staerke: "stark",  restName: "Iodid-Ion",         restFormel: "I⁻"    },
+  { name: "Essigsäure",        formel: "CH₃COOH",  staerke: "schwach",restName: "Acetat-Ion",        restFormel: "CH₃COO⁻"},
+  { name: "Phosphorsäure",     formel: "H₃PO₄",    staerke: "schwach",restName: "Phosphat-Ion",      restFormel: "PO₄³⁻" },
+  { name: "Hypochlorige Säure",formel: "HClO",     staerke: "schwach",restName: "Hypochlorit-Ion",   restFormel: "ClO⁻"  },
+  { name: "Perchlorsäure",     formel: "HClO₄",    staerke: "stark",  restName: "Perchlorat-Ion",    restFormel: "ClO₄⁻" },
+  { name: "Wasser",            formel: "H₂O",      staerke: "schwach",restName: "Hydroxid-Ion",      restFormel: "OH⁻"   },
+];
+
+// Column keys & labels
+const COLS = [
+  { key: "name",       label: "Name der Säure"         },
+  { key: "formel",     label: "Summenformel"            },
+  { key: "staerke",    label: "Stark / Schwach"         },
+  { key: "restName",   label: "Name des Säurerests"     },
+  { key: "restFormel", label: "Summenformel Säurerest"  },
+];
+
+let currentSaeuren = [];
+let prefillColIndices = [];
+
+// Normalize for comparison: trim, lowercase, remove spaces around common symbols
+function normalize(str) {
+  return str.trim()
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/²/g, "2")
+    .replace(/³/g, "3")
+    .replace(/⁻/g, "-")
+    .replace(/⁴/g, "4")
+    .replace(/₁/g, "1")
+    .replace(/₂/g, "2")
+    .replace(/₃/g, "3")
+    .replace(/₄/g, "4")
+    .replace(/₅/g, "5")
+    .replace(/₆/g, "6")
+    .replace(/₇/g, "7")
+    .replace(/₈/g, "8")
+    .replace(/₉/g, "9");
+}
+
+function isCorrect(input, answer) {
+  const n = normalize(input);
+  const a = normalize(answer);
+  if (n === a) return true;
+  // Accept "stark"/"schwach" in either case
+  if (a === "stark" && (n === "stark" || n === "s")) return true;
+  if (a === "schwach" && (n === "schwach" || n === "w" || n === "schw")) return true;
+  return false;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickRandom(arr, n) {
+  return shuffle(arr).slice(0, n);
+}
+
+function buildTable() {
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  currentSaeuren.forEach((saeure, rowIdx) => {
+    const prefillCol = prefillColIndices[rowIdx];
+    const tr = document.createElement("tr");
+
+    COLS.forEach((col, colIdx) => {
+      const td = document.createElement("td");
+
+      if (colIdx === prefillCol) {
+        // Pre-filled cell
+        const span = document.createElement("span");
+        span.className = "prefilled";
+        span.textContent = saeure[col.key];
+        td.appendChild(span);
+      } else {
+        // Input cell
+        const wrap = document.createElement("div");
+        wrap.className = "cell-wrap";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "answer-input";
+        input.placeholder = "…";
+        input.dataset.row = rowIdx;
+        input.dataset.col = colIdx;
+        input.dataset.answer = saeure[col.key];
+        input.autocomplete = "off";
+        input.spellcheck = false;
+
+        const icon = document.createElement("span");
+        icon.className = "cell-icon";
+        icon.id = `icon-${rowIdx}-${colIdx}`;
+
+        wrap.appendChild(input);
+        wrap.appendChild(icon);
+
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        hint.id = `hint-${rowIdx}-${colIdx}`;
+
+        td.appendChild(wrap);
+        td.appendChild(hint);
+      }
+
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+function checkAnswers() {
+  const inputs = document.querySelectorAll(".answer-input");
+  let correct = 0;
+  let total = inputs.length;
+
+  inputs.forEach(input => {
+    const row = input.dataset.row;
+    const col = input.dataset.col;
+    const answer = input.dataset.answer;
+    const icon = document.getElementById(`icon-${row}-${col}`);
+    const hint = document.getElementById(`hint-${row}-${col}`);
+
+    if (isCorrect(input.value, answer)) {
+      input.classList.remove("wrong");
+      input.classList.add("correct");
+      icon.textContent = "✅";
+      hint.classList.remove("show");
+      correct++;
+    } else {
+      input.classList.remove("correct");
+      input.classList.add("wrong");
+      icon.textContent = "❌";
+      hint.innerHTML = `Richtig: <strong>${answer}</strong>`;
+      hint.classList.add("show");
+    }
+
+    input.disabled = true;
+  });
+
+  showScore(correct, total);
+}
+
+function showScore(correct, total) {
+  const box = document.getElementById("scoreBox");
+  const num = document.getElementById("scoreNum");
+  const msg = document.getElementById("scoreMsg");
+
+  box.classList.remove("perfect", "partial", "poor", "show");
+
+  num.textContent = `${correct} / ${total}`;
+
+  if (correct === total) {
+    box.classList.add("perfect");
+    msg.textContent = "🎉 Ausgezeichnet! Alle Antworten sind richtig.";
+  } else if (correct >= total * 0.6) {
+    box.classList.add("partial");
+    msg.textContent = `Gut gemacht! ${total - correct} Feld${total - correct > 1 ? "er" : ""} noch nicht ganz richtig – schau dir die roten Felder an.`;
+  } else {
+    box.classList.add("poor");
+    msg.textContent = `${total - correct} von ${total} Feldern sind falsch. Lies dir die Hinweise durch und versuche es erneut.`;
+  }
+
+  box.classList.add("show");
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function newRound() {
+  currentSaeuren = pickRandom(SAEUREN, 4);
+  // Pick one unique column per row (ensure variety)
+  prefillColIndices = shuffle([0, 1, 2, 3, 4]).slice(0, 4);
+  // Make sure each row gets a different prefill column for variety (already unique due to shuffle)
+  document.getElementById("scoreBox").classList.remove("show");
+  buildTable();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────
+newRound();
+</script>
+</body>
+</html>
