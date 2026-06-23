@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gasgesetze</title>
+<style>
+  :root {
+    --bg:#f0f4f8; --card:#fff; --primary:#1a3a5c; --accent:#2471a3;
+    --correct:#1e8449; --correct-bg:#d5f5e3;
+    --wrong:#922b21; --wrong-bg:#fce4e4;
+    --prefill:#eaf2ff; --prefill-border:#aed6f1;
+    --border:#c8d6e0; --text:#1c2833; --muted:#7f8c8d;
+    --radius:10px; --font:'Segoe UI',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);padding:24px 16px 48px;}
+  .container{max-width:980px;margin:0 auto;}
+  header{text-align:center;margin-bottom:22px;}
+  header h1{font-size:1.55rem;color:var(--primary);font-weight:700;}
+  header .hero{font-size:1.2rem;color:var(--accent);margin-top:7px;font-weight:600;}
+  header p{color:var(--muted);margin-top:5px;font-size:0.88rem;}
+  .tabs{display:flex;gap:6px;margin-bottom:0;flex-wrap:wrap;justify-content:center;}
+  .tab-btn{padding:9px 22px;border-radius:8px 8px 0 0;border:2px solid var(--border);border-bottom:none;
+    background:#d6e4f0;color:var(--primary);font-size:0.88rem;font-weight:600;font-family:var(--font);
+    cursor:pointer;transition:background 0.15s;}
+  .tab-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .tab-btn:hover:not(.active){background:#b8d0e8;}
+  .tab-panel{display:none;} .tab-panel.active{display:block;}
+  .card{background:var(--card);border-radius:0 var(--radius) var(--radius) var(--radius);
+    box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid var(--border);padding:20px;}
+  .info-box{background:var(--prefill);border:1.5px solid var(--prefill-border);border-radius:8px;
+    padding:10px 14px;margin-bottom:16px;font-size:0.84rem;color:var(--primary);line-height:1.6;}
+  .info-box strong{font-weight:700;}
+  .table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;min-width:480px;}
+  thead th{background:var(--primary);color:#fff;padding:12px;font-size:0.82rem;font-weight:600;text-align:left;}
+  tbody tr{border-bottom:1px solid var(--border);}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:nth-child(even){background:#fafcfe;}
+  td{padding:9px 12px;vertical-align:middle;font-size:0.9rem;}
+  .prefilled{background:var(--prefill);border:1.5px solid var(--prefill-border);border-radius:6px;
+    padding:6px 10px;font-weight:600;color:var(--primary);font-size:0.88rem;display:inline-block;}
+  .cell-wrap{display:flex;align-items:center;gap:6px;}
+  .cell-icon{font-size:1rem;flex-shrink:0;min-width:20px;text-align:center;}
+  .answer-input{width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:6px;
+    font-size:0.88rem;font-family:var(--font);color:var(--text);background:#fff;outline:none;
+    transition:border-color 0.2s,background 0.2s;}
+  .answer-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(36,113,163,0.12);}
+  .answer-input.correct{border-color:var(--correct);background:var(--correct-bg);color:var(--correct);font-weight:600;}
+  .answer-input.wrong{border-color:var(--wrong);background:var(--wrong-bg);color:var(--wrong);}
+  .answer-input:disabled{cursor:default;}
+  .hint{font-size:0.76rem;color:var(--wrong);margin-top:3px;display:none;}
+  .hint.show{display:block;} .hint strong{font-weight:600;}
+  .tag-const{display:inline-block;background:#e8f4fd;border:1px solid #aed6f1;
+    border-radius:12px;padding:2px 9px;font-size:0.82rem;color:var(--primary);font-weight:600;}
+  .tag-up{display:inline-block;background:#fef0f0;border:1px solid #e57373;
+    border-radius:12px;padding:2px 9px;font-size:0.82rem;color:#c0392b;font-weight:700;}
+  .tag-down{display:inline-block;background:#e8f4fd;border:1px solid #64b5f6;
+    border-radius:12px;padding:2px 9px;font-size:0.82rem;color:#1a5276;font-weight:700;}
+  .prop-row{display:flex;align-items:center;gap:8px;}
+  .prop-fixed{font-size:1.05rem;font-weight:700;color:var(--primary);}
+  .prop-tilde{font-size:1.1rem;color:#555;font-weight:600;}
+  .prop-input{max-width:90px !important;}
+  .legend{display:flex;gap:16px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:0.8rem;color:var(--muted);}
+  .legend-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+  .actions{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+  .btn{padding:10px 24px;border-radius:8px;font-size:0.9rem;font-weight:600;font-family:var(--font);
+    cursor:pointer;border:2px solid transparent;transition:all 0.18s;}
+  .btn-submit{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .btn-submit:hover{background:#122840;}
+  .btn-reset{background:#fff;color:var(--primary);border-color:var(--primary);}
+  .btn-reset:hover{background:var(--prefill);}
+  .score-box{display:none;margin-top:18px;padding:14px 18px;border-radius:var(--radius);border:2px solid;text-align:center;}
+  .score-box.show{display:block;}
+  .score-box.perfect{background:var(--correct-bg);border-color:var(--correct);color:var(--correct);}
+  .score-box.partial{background:#fef9e7;border-color:#d4ac0d;color:#7d6608;}
+  .score-box.poor{background:var(--wrong-bg);border-color:var(--wrong);color:var(--wrong);}
+  .score-num{font-size:1.7rem;font-weight:700;display:block;margin-bottom:3px;}
+  .score-msg{font-size:0.88rem;}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>&#x1F9EA; Gasgesetze &ndash; Lern&uuml;bung</h1>
+    <div class="hero">p &middot; V = n &middot; R &middot; T</div>
+    <p>F&uuml;lle die leeren Felder aus und &uuml;berpr&uuml;fe deine Antworten.</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('umstellung')">&#x1F4D0; Umstellung</button>
+    <button class="tab-btn" onclick="switchTab('spezial')">&#x1F4CF; Spezialgesetze</button>
+    <button class="tab-btn" onclick="switchTab('qualitativ')">&#x1F504; Qualitatives Verhalten</button>
+  </div>
+
+  <!-- TAB 1 -->
+  <div class="tab-panel active" id="tab-umstellung">
+    <div class="card">
+      <div class="info-box">
+        <strong>Ideale Gasgleichung: p &middot; V = n &middot; R &middot; T</strong><br>
+        Ein Feld pro Zeile ist bereits ausgef&uuml;llt (nie die Formel). Trage die restlichen Felder ein.
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th>Gesuchte Gr&ouml;&szlig;e</th>
+          <th>Symbol</th>
+          <th>Einheit</th>
+          <th>Umgestellte Formel</th>
+        </tr></thead>
+        <tbody id="tbody-umstellung"></tbody>
+      </table></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#aed6f1;border:1px solid #2471a3"></div>Vorgegeben</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#d5f5e3;border:1px solid #1e8449"></div>Richtig</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fce4e4;border:1px solid #922b21"></div>Falsch</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-submit" onclick="checkTable('umstellung')">&#x2714; Auswerten</button>
+        <button class="btn btn-reset" onclick="buildUmstellung()">&#x1F504; Neue Aufgaben</button>
+      </div>
+      <div class="score-box" id="score-umstellung">
+        <span class="score-num" id="scorenum-umstellung"></span>
+        <span class="score-msg" id="scoremsg-umstellung"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2 -->
+  <div class="tab-panel" id="tab-spezial">
+    <div class="card">
+      <div class="info-box">
+        <strong>Spezialgesetze der idealen Gasgleichung.</strong><br>
+        Eine Seite der Proportionalit&auml;t steht bereits da &ndash; trage die andere ein.
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th>Gesetzesname</th>
+          <th>Konstant</th>
+          <th>Proportionalit&auml;t</th>
+        </tr></thead>
+        <tbody id="tbody-spezial"></tbody>
+      </table></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#aed6f1;border:1px solid #2471a3"></div>Vorgegeben</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#d5f5e3;border:1px solid #1e8449"></div>Richtig</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fce4e4;border:1px solid #922b21"></div>Falsch</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-submit" onclick="checkTable('spezial')">&#x2714; Auswerten</button>
+        <button class="btn btn-reset" onclick="buildSpezial()">&#x1F504; Neue Aufgaben</button>
+      </div>
+      <div class="score-box" id="score-spezial">
+        <span class="score-num" id="scorenum-spezial"></span>
+        <span class="score-msg" id="scoremsg-spezial"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3 -->
+  <div class="tab-panel" id="tab-qualitativ">
+    <div class="card">
+      <div class="info-box">
+        <strong>Qualitatives Verhalten:</strong> Zwei Gr&ouml;&szlig;en sind konstant, eine ver&auml;ndert sich &ndash;
+        was passiert mit der vierten?<br>
+        Antworte mit <em>steigt</em> oder <em>sinkt</em>.
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th>Druck (p)</th>
+          <th>Volumen (V)</th>
+          <th>Stoffmenge (n)</th>
+          <th>Temperatur (T)</th>
+        </tr></thead>
+        <tbody id="tbody-qualitativ"></tbody>
+      </table></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#e8f4fd;border:1px solid #aed6f1"></div>Konstant</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fef0f0;border:1px solid #e57373"></div>Steigt</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#e8f4fd;border:1px solid #64b5f6"></div>Sinkt</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#d5f5e3;border:1px solid #1e8449"></div>Richtig</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#fce4e4;border:1px solid #922b21"></div>Falsch</div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-submit" onclick="checkTable('qualitativ')">&#x2714; Auswerten</button>
+        <button class="btn btn-reset" onclick="buildQualitativ()">&#x1F504; Neue Szenarien</button>
+      </div>
+      <div class="score-box" id="score-qualitativ">
+        <span class="score-num" id="scorenum-qualitativ"></span>
+        <span class="score-msg" id="scoremsg-qualitativ"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+
+const UMST = [
+  { name:"Druck",        symbol:"p", einheit:"Pa",        formel:"p = (n · R · T) / V" },
+  { name:"Volumen",      symbol:"V", einheit:"m³",        formel:"V = (n · R · T) / p" },
+  { name:"Stoffmenge",   symbol:"n", einheit:"mol",       formel:"n = (p · V) / (R · T)" },
+  { name:"Temperatur",   symbol:"T", einheit:"K",         formel:"T = (p · V) / (n · R)" },
+  { name:"Gaskonstante", symbol:"R", einheit:"J/(mol·K)", formel:"R = (p · V) / (n · T)" },
+];
+
+const SPEZ = [
+  { name:"Boyle-Mariotte",              konstant:"n, T", left:"p",  right:"1/V",  leftAlts:["p"],         rightAlts:["1/V","V-1"] },
+  { name:"Gay-Lussac",                  konstant:"n, V", left:"p",  right:"T",    leftAlts:["p"],         rightAlts:["T"] },
+  { name:"Gesetz von Charles",          konstant:"n, p", left:"V",  right:"T",    leftAlts:["V"],         rightAlts:["T"] },
+  { name:"Gesetz von Avogadro",         konstant:"p, T", left:"V",  right:"n",    leftAlts:["V"],         rightAlts:["n"] },
+  { name:"Isobare Zustandsaenderung",   konstant:"n, p", left:"V",  right:"T",    leftAlts:["V"],         rightAlts:["T"] },
+  { name:"Isochore Zustandsaenderung",  konstant:"n, V", left:"p",  right:"T",    leftAlts:["p"],         rightAlts:["T"] },
+];
+
+// p=col0, V=col1, n=col2, T=col3
+// cell value: "const" | "up" | "down" | "answer"
+// result: what to type in the answer cell
+const QUAL = [
+  { cells:["up","const","const","answer"],   result:"steigt"  }, // p steigt, V+n const → T?
+  { cells:["down","const","const","answer"], result:"sinkt"   }, // p sinkt,  V+n const → T?
+  { cells:["answer","up","const","const"],   result:"sinkt"   }, // V steigt, n+T const → p?
+  { cells:["answer","down","const","const"], result:"steigt"  }, // V sinkt,  n+T const → p?
+  { cells:["const","answer","const","up"],   result:"steigt"  }, // T steigt, n+p const → V?
+  { cells:["const","answer","const","down"], result:"sinkt"   }, // T sinkt,  n+p const → V?
+  { cells:["const","answer","up","const"],   result:"steigt"  }, // n steigt, p+T const → V?
+  { cells:["const","answer","down","const"], result:"sinkt"   }, // n sinkt,  p+T const → V?
+  { cells:["answer","const","const","up"],   result:"steigt"  }, // T steigt, n+V const → p?
+  { cells:["answer","const","const","down"], result:"sinkt"   }, // T sinkt,  n+V const → p?
+  { cells:["answer","const","up","const"],   result:"steigt"  }, // n steigt, V+T const → p?
+  { cells:["answer","const","down","const"], result:"sinkt"   }, // n sinkt,  V+T const → p?
+];
+
+// ── UTILS ─────────────────────────────────────────────
+
+function shuffle(a) {
+  a = [...a];
+  for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function pick(a,n) { return shuffle(a).slice(0,n); }
+
+function norm(s) {
+  return s.trim().toLowerCase().replace(/\s+/g,"")
+    .replace(/\u00b7/g,"*").replace(/\u00d7/g,"*")
+    .replace(/\u207b\xb9/g,"-1");
+}
+function matches(inp, ans, alts) {
+  const n = norm(inp);
+  if (n===norm(ans)) return true;
+  if (alts && alts.some(a=>norm(a)===n)) return true;
+  const sv = {steigt:["steigt","steigend","nimmt zu","groesser","hoeher"],
+              sinkt:["sinkt","sinken","nimmt ab","kleiner","faellt","tiefer"]};
+  const ak = norm(ans);
+  if (sv[ak] && sv[ak].includes(n)) return true;
+  return false;
+}
+
+function mkInput(answer, alts, tableKey) {
+  const td_wrap = document.createElement("div");
+  td_wrap.className = "cell-wrap";
+  const inp = document.createElement("input");
+  inp.type="text"; inp.className="answer-input"; inp.placeholder="…";
+  inp.dataset.answer=answer;
+  inp.dataset.alts=JSON.stringify(alts||[]);
+  inp.dataset.table=tableKey;
+  inp.autocomplete="off"; inp.spellcheck=false;
+  const icon = document.createElement("span");
+  icon.className = "cell-icon";
+  td_wrap.appendChild(inp);
+  td_wrap.appendChild(icon);
+  return td_wrap;
+}
+
+function addCell(tr, content) {
+  const td = document.createElement("td");
+  if (typeof content === "string") {
+    td.innerHTML = content;
+  } else {
+    td.appendChild(content);
+  }
+  tr.appendChild(td);
+  return td;
+}
+
+function addInputCell(tr, answer, alts, tableKey) {
+  const td = document.createElement("td");
+  const wrap = mkInput(answer, alts, tableKey);
+  td.appendChild(wrap);
+  const hint = document.createElement("div");
+  hint.className="hint";
+  td.appendChild(hint);
+  tr.appendChild(td);
+}
+
+function addPrefilled(tr, text) {
+  const td = document.createElement("td");
+  const span = document.createElement("span");
+  span.className="prefilled";
+  span.textContent=text;
+  td.appendChild(span);
+  tr.appendChild(td);
+}
+
+// ── TAB 1: UMSTELLUNG ─────────────────────────────────
+
+function buildUmstellung() {
+  resetScore("umstellung");
+  const tbody = document.getElementById("tbody-umstellung");
+  tbody.innerHTML = "";
+  const rows = pick(UMST, 4);
+  // prefill cols 0,1,2 only (never 3=formel), one unique per row
+  const pfCols = shuffle([0,1,2,0,1,2]).slice(0,4);
+
+  rows.forEach((row,ri) => {
+    const tr = document.createElement("tr");
+    const pc = pfCols[ri];
+    // col 0: name
+    if(pc===0) addPrefilled(tr, row.name); else addInputCell(tr, row.name, [], "umstellung");
+    // col 1: symbol
+    if(pc===1) addPrefilled(tr, row.symbol); else addInputCell(tr, row.symbol, [], "umstellung");
+    // col 2: einheit
+    if(pc===2) addPrefilled(tr, row.einheit); else addInputCell(tr, row.einheit, [], "umstellung");
+    // col 3: formel – ALWAYS input
+    addInputCell(tr, row.formel, [], "umstellung");
+    tbody.appendChild(tr);
+  });
+}
+
+// ── TAB 2: SPEZIALGESETZE ─────────────────────────────
+
+function buildSpezial() {
+  resetScore("spezial");
+  const tbody = document.getElementById("tbody-spezial");
+  tbody.innerHTML = "";
+  const rows = pick(SPEZ, 4);
+  const pfCols = shuffle([0,1,0,1]).slice(0,4);
+
+  rows.forEach((row,ri) => {
+    const tr = document.createElement("tr");
+    const pc = pfCols[ri];
+
+    // col 0: name
+    if(pc===0) addPrefilled(tr, row.name); else addInputCell(tr, row.name, [], "spezial");
+    // col 1: konstant
+    if(pc===1) addPrefilled(tr, row.konstant); else addInputCell(tr, row.konstant, [], "spezial");
+
+    // col 2: proportionality – one side shown, one is input
+    const td2 = document.createElement("td");
+    const showLeft = Math.random() > 0.5;
+    const propRow = document.createElement("div");
+    propRow.className = "prop-row";
+
+    if (showLeft) {
+      const lSpan = document.createElement("span");
+      lSpan.className = "prop-fixed prefilled";
+      lSpan.textContent = row.left;
+      const tilde = document.createElement("span");
+      tilde.className = "prop-tilde";
+      tilde.textContent = " ~ ";
+      const wrap = mkInput(row.right, row.rightAlts, "spezial");
+      wrap.querySelector("input").classList.add("prop-input");
+      propRow.appendChild(lSpan);
+      propRow.appendChild(tilde);
+      propRow.appendChild(wrap);
+    } else {
+      const wrap = mkInput(row.left, row.leftAlts, "spezial");
+      wrap.querySelector("input").classList.add("prop-input");
+      const tilde = document.createElement("span");
+      tilde.className = "prop-tilde";
+      tilde.textContent = " ~ ";
+      const rSpan = document.createElement("span");
+      rSpan.className = "prop-fixed prefilled";
+      rSpan.textContent = row.right;
+      propRow.appendChild(wrap);
+      propRow.appendChild(tilde);
+      propRow.appendChild(rSpan);
+    }
+
+    const hint = document.createElement("div");
+    hint.className = "hint";
+    td2.appendChild(propRow);
+    td2.appendChild(hint);
+    tr.appendChild(td2);
+    tbody.appendChild(tr);
+  });
+}
+
+// ── TAB 3: QUALITATIV ─────────────────────────────────
+
+function buildQualitativ() {
+  resetScore("qualitativ");
+  const tbody = document.getElementById("tbody-qualitativ");
+  tbody.innerHTML = "";
+  const rows = pick(QUAL, 5);
+
+  rows.forEach(row => {
+    const tr = document.createElement("tr");
+    row.cells.forEach(type => {
+      const td = document.createElement("td");
+      if (type === "answer") {
+        const wrap = mkInput(row.result, [], "qualitativ");
+        td.appendChild(wrap);
+        const hint = document.createElement("div");
+        hint.className = "hint";
+        td.appendChild(hint);
+      } else if (type === "const") {
+        const span = document.createElement("span");
+        span.className = "tag-const";
+        span.textContent = "= const";
+        td.appendChild(span);
+      } else if (type === "up") {
+        const span = document.createElement("span");
+        span.className = "tag-up";
+        span.textContent = "steigt \u2191";
+        td.appendChild(span);
+      } else if (type === "down") {
+        const span = document.createElement("span");
+        span.className = "tag-down";
+        span.textContent = "sinkt \u2193";
+        td.appendChild(span);
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+// ── CHECK ─────────────────────────────────────────────
+
+function checkTable(key) {
+  const inputs = document.querySelectorAll(`.answer-input[data-table="${key}"]`);
+  let correct=0, total=inputs.length;
+  inputs.forEach(inp => {
+    const ans = inp.dataset.answer;
+    const alts = JSON.parse(inp.dataset.alts||"[]");
+    const icon = inp.nextElementSibling;
+    const hint = inp.closest("td").querySelector(".hint");
+    if (matches(inp.value, ans, alts)) {
+      inp.classList.remove("wrong"); inp.classList.add("correct");
+      if(icon) icon.textContent="✅";
+      if(hint) hint.classList.remove("show");
+      correct++;
+    } else {
+      inp.classList.remove("correct"); inp.classList.add("wrong");
+      if(icon) icon.textContent="❌";
+      if(hint) { hint.innerHTML="Richtig: <strong>"+ans+"</strong>"; hint.classList.add("show"); }
+    }
+    inp.disabled=true;
+  });
+  showScore(key, correct, total);
+}
+
+function showScore(key, correct, total) {
+  const box=document.getElementById("score-"+key);
+  const num=document.getElementById("scorenum-"+key);
+  const msg=document.getElementById("scoremsg-"+key);
+  box.classList.remove("perfect","partial","poor","show");
+  num.textContent=correct+" / "+total;
+  if(correct===total){box.classList.add("perfect");msg.textContent="Ausgezeichnet! Alle Antworten richtig.";}
+  else if(correct>=total*0.6){box.classList.add("partial");msg.textContent="Gut! "+(total-correct)+" Feld"+(total-correct>1?"er":"")+" noch nicht richtig.";}
+  else{box.classList.add("poor");msg.textContent=(total-correct)+" von "+total+" Feldern falsch – schau dir die Hinweise an!";}
+  box.classList.add("show");
+  box.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+function resetScore(key) {
+  document.getElementById("score-"+key).classList.remove("show");
+}
+
+function switchTab(id) {
+  ["umstellung","spezial","qualitativ"].forEach((t,i) => {
+    document.querySelectorAll(".tab-btn")[i].classList.toggle("active",t===id);
+    document.getElementById("tab-"+t).classList.toggle("active",t===id);
+  });
+}
+
+buildUmstellung();
+buildSpezial();
+buildQualitativ();
+<\/script>
+</body>
+</html>
