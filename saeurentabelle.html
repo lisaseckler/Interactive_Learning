@@ -525,7 +525,7 @@ function showScore(correct, total) {
 function newRound() {
   currentSaeuren = pickRandom(SAEUREN, 4);
   // Pick one unique column per row (ensure variety)
-  prefillColIndices = shuffle([0, 1, 2, 3, 4]).slice(0, 4);
+  prefillColIndices = shuffle([0, 1, 3, 4]).slice(0, 4);
   // Make sure each row gets a different prefill column for variety (already unique due to shuffle)
   document.getElementById("scoreBox").classList.remove("show");
   buildTable();
