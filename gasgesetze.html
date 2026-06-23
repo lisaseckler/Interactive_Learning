@@ -11,26 +11,27 @@
     --wrong:#922b21; --wrong-bg:#fce4e4;
     --prefill:#eaf2ff; --prefill-border:#aed6f1;
     --border:#c8d6e0; --text:#1c2833; --muted:#7f8c8d;
-    --radius:10px; --font:'Segoe UI',system-ui,sans-serif;
+    --radius:10px; --font:"Segoe UI",system-ui,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:var(--font);background:var(--bg);color:var(--text);padding:24px 16px 48px;}
   .container{max-width:980px;margin:0 auto;}
   header{text-align:center;margin-bottom:22px;}
   header h1{font-size:1.55rem;color:var(--primary);font-weight:700;}
-  header .hero{font-size:1.2rem;color:var(--accent);margin-top:7px;font-weight:600;}
+  .hero{font-size:1.2rem;color:var(--accent);margin-top:7px;font-weight:600;}
   header p{color:var(--muted);margin-top:5px;font-size:0.88rem;}
   .tabs{display:flex;gap:6px;margin-bottom:0;flex-wrap:wrap;justify-content:center;}
-  .tab-btn{padding:9px 22px;border-radius:8px 8px 0 0;border:2px solid var(--border);border-bottom:none;
-    background:#d6e4f0;color:var(--primary);font-size:0.88rem;font-weight:600;font-family:var(--font);
-    cursor:pointer;transition:background 0.15s;}
+  .tab-btn{padding:9px 22px;border-radius:8px 8px 0 0;border:2px solid var(--border);
+    border-bottom:none;background:#d6e4f0;color:var(--primary);font-size:0.88rem;
+    font-weight:600;font-family:var(--font);cursor:pointer;transition:background 0.15s;}
   .tab-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
   .tab-btn:hover:not(.active){background:#b8d0e8;}
   .tab-panel{display:none;} .tab-panel.active{display:block;}
   .card{background:var(--card);border-radius:0 var(--radius) var(--radius) var(--radius);
     box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid var(--border);padding:20px;}
-  .info-box{background:var(--prefill);border:1.5px solid var(--prefill-border);border-radius:8px;
-    padding:10px 14px;margin-bottom:16px;font-size:0.84rem;color:var(--primary);line-height:1.6;}
+  .info-box{background:var(--prefill);border:1.5px solid var(--prefill-border);
+    border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:0.84rem;
+    color:var(--primary);line-height:1.6;}
   .info-box strong{font-weight:700;}
   .table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
   table{width:100%;border-collapse:collapse;min-width:480px;}
@@ -39,17 +40,19 @@
   tbody tr:last-child{border-bottom:none;}
   tbody tr:nth-child(even){background:#fafcfe;}
   td{padding:9px 12px;vertical-align:middle;font-size:0.9rem;}
-  .prefilled{background:var(--prefill);border:1.5px solid var(--prefill-border);border-radius:6px;
-    padding:6px 10px;font-weight:600;color:var(--primary);font-size:0.88rem;display:inline-block;}
+  .prefilled{background:var(--prefill);border:1.5px solid var(--prefill-border);
+    border-radius:6px;padding:6px 10px;font-weight:600;color:var(--primary);
+    font-size:0.88rem;display:inline-block;}
   .cell-wrap{display:flex;align-items:center;gap:6px;}
   .cell-icon{font-size:1rem;flex-shrink:0;min-width:20px;text-align:center;}
-  .answer-input{width:100%;padding:7px 9px;border:1.5px solid var(--border);border-radius:6px;
-    font-size:0.88rem;font-family:var(--font);color:var(--text);background:#fff;outline:none;
-    transition:border-color 0.2s,background 0.2s;}
+  .answer-input{width:100%;padding:7px 9px;border:1.5px solid var(--border);
+    border-radius:6px;font-size:0.88rem;font-family:var(--font);color:var(--text);
+    background:#fff;outline:none;transition:border-color 0.2s,background 0.2s;}
   .answer-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(36,113,163,0.12);}
   .answer-input.correct{border-color:var(--correct);background:var(--correct-bg);color:var(--correct);font-weight:600;}
   .answer-input.wrong{border-color:var(--wrong);background:var(--wrong-bg);color:var(--wrong);}
   .answer-input:disabled{cursor:default;}
+  .prop-input{max-width:90px !important;}
   .hint{font-size:0.76rem;color:var(--wrong);margin-top:3px;display:none;}
   .hint.show{display:block;} .hint strong{font-weight:600;}
   .tag-const{display:inline-block;background:#e8f4fd;border:1px solid #aed6f1;
@@ -58,21 +61,21 @@
     border-radius:12px;padding:2px 9px;font-size:0.82rem;color:#c0392b;font-weight:700;}
   .tag-down{display:inline-block;background:#e8f4fd;border:1px solid #64b5f6;
     border-radius:12px;padding:2px 9px;font-size:0.82rem;color:#1a5276;font-weight:700;}
-  .prop-row{display:flex;align-items:center;gap:8px;}
+  .prop-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .prop-fixed{font-size:1.05rem;font-weight:700;color:var(--primary);}
   .prop-tilde{font-size:1.1rem;color:#555;font-weight:600;}
-  .prop-input{max-width:90px !important;}
   .legend{display:flex;gap:16px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
   .legend-item{display:flex;align-items:center;gap:5px;font-size:0.8rem;color:var(--muted);}
   .legend-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
   .actions{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
-  .btn{padding:10px 24px;border-radius:8px;font-size:0.9rem;font-weight:600;font-family:var(--font);
-    cursor:pointer;border:2px solid transparent;transition:all 0.18s;}
+  .btn{padding:10px 24px;border-radius:8px;font-size:0.9rem;font-weight:600;
+    font-family:var(--font);cursor:pointer;border:2px solid transparent;transition:all 0.18s;}
   .btn-submit{background:var(--primary);color:#fff;border-color:var(--primary);}
   .btn-submit:hover{background:#122840;}
   .btn-reset{background:#fff;color:var(--primary);border-color:var(--primary);}
   .btn-reset:hover{background:var(--prefill);}
-  .score-box{display:none;margin-top:18px;padding:14px 18px;border-radius:var(--radius);border:2px solid;text-align:center;}
+  .score-box{display:none;margin-top:18px;padding:14px 18px;border-radius:var(--radius);
+    border:2px solid;text-align:center;}
   .score-box.show{display:block;}
   .score-box.perfect{background:var(--correct-bg);border-color:var(--correct);color:var(--correct);}
   .score-box.partial{background:#fef9e7;border-color:#d4ac0d;color:#7d6608;}
@@ -102,15 +105,17 @@
         <strong>Ideale Gasgleichung: p &middot; V = n &middot; R &middot; T</strong><br>
         Ein Feld pro Zeile ist bereits ausgef&uuml;llt (nie die Formel). Trage die restlichen Felder ein.
       </div>
-      <div class="table-wrap"><table>
-        <thead><tr>
-          <th>Gesuchte Gr&ouml;&szlig;e</th>
-          <th>Symbol</th>
-          <th>Einheit</th>
-          <th>Umgestellte Formel</th>
-        </tr></thead>
-        <tbody id="tbody-umstellung"></tbody>
-      </table></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Gesuchte Gr&ouml;&szlig;e</th>
+            <th>Symbol</th>
+            <th>Einheit</th>
+            <th>Umgestellte Formel</th>
+          </tr></thead>
+          <tbody id="tbody-umstellung"></tbody>
+        </table>
+      </div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:#aed6f1;border:1px solid #2471a3"></div>Vorgegeben</div>
         <div class="legend-item"><div class="legend-dot" style="background:#d5f5e3;border:1px solid #1e8449"></div>Richtig</div>
@@ -134,14 +139,16 @@
         <strong>Spezialgesetze der idealen Gasgleichung.</strong><br>
         Eine Seite der Proportionalit&auml;t steht bereits da &ndash; trage die andere ein.
       </div>
-      <div class="table-wrap"><table>
-        <thead><tr>
-          <th>Gesetzesname</th>
-          <th>Konstant</th>
-          <th>Proportionalit&auml;t</th>
-        </tr></thead>
-        <tbody id="tbody-spezial"></tbody>
-      </table></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Gesetzesname</th>
+            <th>Konstant</th>
+            <th>Proportionalit&auml;t</th>
+          </tr></thead>
+          <tbody id="tbody-spezial"></tbody>
+        </table>
+      </div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:#aed6f1;border:1px solid #2471a3"></div>Vorgegeben</div>
         <div class="legend-item"><div class="legend-dot" style="background:#d5f5e3;border:1px solid #1e8449"></div>Richtig</div>
@@ -162,19 +169,20 @@
   <div class="tab-panel" id="tab-qualitativ">
     <div class="card">
       <div class="info-box">
-        <strong>Qualitatives Verhalten:</strong> Zwei Gr&ouml;&szlig;en sind konstant, eine ver&auml;ndert sich &ndash;
-        was passiert mit der vierten?<br>
+        <strong>Qualitatives Verhalten:</strong> Zwei Gr&ouml;&szlig;en sind konstant, eine ver&auml;ndert sich &ndash; was passiert mit der vierten?<br>
         Antworte mit <em>steigt</em> oder <em>sinkt</em>.
       </div>
-      <div class="table-wrap"><table>
-        <thead><tr>
-          <th>Druck (p)</th>
-          <th>Volumen (V)</th>
-          <th>Stoffmenge (n)</th>
-          <th>Temperatur (T)</th>
-        </tr></thead>
-        <tbody id="tbody-qualitativ"></tbody>
-      </table></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Druck (p)</th>
+            <th>Volumen (V)</th>
+            <th>Stoffmenge (n)</th>
+            <th>Temperatur (T)</th>
+          </tr></thead>
+          <tbody id="tbody-qualitativ"></tbody>
+        </table>
+      </div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:#e8f4fd;border:1px solid #aed6f1"></div>Konstant</div>
         <div class="legend-item"><div class="legend-dot" style="background:#fef0f0;border:1px solid #e57373"></div>Steigt</div>
@@ -195,290 +203,290 @@
 </div>
 
 <script>
-// ── DATA ──────────────────────────────────────────────
-
-const UMST = [
-  { name:"Druck",        symbol:"p", einheit:"Pa",        formel:"p = (n · R · T) / V" },
-  { name:"Volumen",      symbol:"V", einheit:"m³",        formel:"V = (n · R · T) / p" },
-  { name:"Stoffmenge",   symbol:"n", einheit:"mol",       formel:"n = (p · V) / (R · T)" },
-  { name:"Temperatur",   symbol:"T", einheit:"K",         formel:"T = (p · V) / (n · R)" },
-  { name:"Gaskonstante", symbol:"R", einheit:"J/(mol·K)", formel:"R = (p · V) / (n · T)" },
+var UMST = [
+  { name:"Druck",        symbol:"p", einheit:"Pa",        formel:"p = (n * R * T) / V" },
+  { name:"Volumen",      symbol:"V", einheit:"m3",        formel:"V = (n * R * T) / p" },
+  { name:"Stoffmenge",   symbol:"n", einheit:"mol",       formel:"n = (p * V) / (R * T)" },
+  { name:"Temperatur",   symbol:"T", einheit:"K",         formel:"T = (p * V) / (n * R)" },
+  { name:"Gaskonstante", symbol:"R", einheit:"J/(mol*K)", formel:"R = (p * V) / (n * T)" }
 ];
 
-const SPEZ = [
-  { name:"Boyle-Mariotte",              konstant:"n, T", left:"p",  right:"1/V",  leftAlts:["p"],         rightAlts:["1/V","V-1"] },
-  { name:"Gay-Lussac",                  konstant:"n, V", left:"p",  right:"T",    leftAlts:["p"],         rightAlts:["T"] },
-  { name:"Gesetz von Charles",          konstant:"n, p", left:"V",  right:"T",    leftAlts:["V"],         rightAlts:["T"] },
-  { name:"Gesetz von Avogadro",         konstant:"p, T", left:"V",  right:"n",    leftAlts:["V"],         rightAlts:["n"] },
-  { name:"Isobare Zustandsaenderung",   konstant:"n, p", left:"V",  right:"T",    leftAlts:["V"],         rightAlts:["T"] },
-  { name:"Isochore Zustandsaenderung",  konstant:"n, V", left:"p",  right:"T",    leftAlts:["p"],         rightAlts:["T"] },
+var SPEZ = [
+  { name:"Boyle-Mariotte",             konstant:"n, T", left:"p", right:"1/V",  leftAlts:["p"],  rightAlts:["1/V","V-1"] },
+  { name:"Gay-Lussac",                 konstant:"n, V", left:"p", right:"T",    leftAlts:["p"],  rightAlts:["T"] },
+  { name:"Gesetz von Charles",         konstant:"n, p", left:"V", right:"T",    leftAlts:["V"],  rightAlts:["T"] },
+  { name:"Gesetz von Avogadro",        konstant:"p, T", left:"V", right:"n",    leftAlts:["V"],  rightAlts:["n"] },
+  { name:"Isobare Zustandsaenderung",  konstant:"n, p", left:"V", right:"T",    leftAlts:["V"],  rightAlts:["T"] },
+  { name:"Isochore Zustandsaenderung", konstant:"n, V", left:"p", right:"T",    leftAlts:["p"],  rightAlts:["T"] }
 ];
 
-// p=col0, V=col1, n=col2, T=col3
-// cell value: "const" | "up" | "down" | "answer"
-// result: what to type in the answer cell
-const QUAL = [
-  { cells:["up","const","const","answer"],   result:"steigt"  }, // p steigt, V+n const → T?
-  { cells:["down","const","const","answer"], result:"sinkt"   }, // p sinkt,  V+n const → T?
-  { cells:["answer","up","const","const"],   result:"sinkt"   }, // V steigt, n+T const → p?
-  { cells:["answer","down","const","const"], result:"steigt"  }, // V sinkt,  n+T const → p?
-  { cells:["const","answer","const","up"],   result:"steigt"  }, // T steigt, n+p const → V?
-  { cells:["const","answer","const","down"], result:"sinkt"   }, // T sinkt,  n+p const → V?
-  { cells:["const","answer","up","const"],   result:"steigt"  }, // n steigt, p+T const → V?
-  { cells:["const","answer","down","const"], result:"sinkt"   }, // n sinkt,  p+T const → V?
-  { cells:["answer","const","const","up"],   result:"steigt"  }, // T steigt, n+V const → p?
-  { cells:["answer","const","const","down"], result:"sinkt"   }, // T sinkt,  n+V const → p?
-  { cells:["answer","const","up","const"],   result:"steigt"  }, // n steigt, V+T const → p?
-  { cells:["answer","const","down","const"], result:"sinkt"   }, // n sinkt,  V+T const → p?
+var QUAL = [
+  { cells:["up","const","const","answer"],   result:"steigt" },
+  { cells:["down","const","const","answer"], result:"sinkt"  },
+  { cells:["answer","up","const","const"],   result:"sinkt"  },
+  { cells:["answer","down","const","const"], result:"steigt" },
+  { cells:["const","answer","const","up"],   result:"steigt" },
+  { cells:["const","answer","const","down"], result:"sinkt"  },
+  { cells:["const","answer","up","const"],   result:"steigt" },
+  { cells:["const","answer","down","const"], result:"sinkt"  },
+  { cells:["answer","const","const","up"],   result:"steigt" },
+  { cells:["answer","const","const","down"], result:"sinkt"  },
+  { cells:["answer","const","up","const"],   result:"steigt" },
+  { cells:["answer","const","down","const"], result:"sinkt"  }
 ];
-
-// ── UTILS ─────────────────────────────────────────────
 
 function shuffle(a) {
-  a = [...a];
-  for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  a = a.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
   return a;
 }
-function pick(a,n) { return shuffle(a).slice(0,n); }
+
+function pick(a, n) { return shuffle(a).slice(0, n); }
 
 function norm(s) {
-  return s.trim().toLowerCase().replace(/\s+/g,"")
-    .replace(/\u00b7/g,"*").replace(/\u00d7/g,"*")
-    .replace(/\u207b\xb9/g,"-1");
+  return String(s).trim().toLowerCase().replace(/\s+/g, "");
 }
+
 function matches(inp, ans, alts) {
-  const n = norm(inp);
-  if (n===norm(ans)) return true;
-  if (alts && alts.some(a=>norm(a)===n)) return true;
-  const sv = {steigt:["steigt","steigend","nimmt zu","groesser","hoeher"],
-              sinkt:["sinkt","sinken","nimmt ab","kleiner","faellt","tiefer"]};
-  const ak = norm(ans);
-  if (sv[ak] && sv[ak].includes(n)) return true;
+  var n = norm(inp);
+  if (n === norm(ans)) return true;
+  if (alts) {
+    for (var i = 0; i < alts.length; i++) {
+      if (n === norm(alts[i])) return true;
+    }
+  }
+  var steigt = ["steigt","steigend","nimmtzu","groesser","hoeher","waechst"];
+  var sinkt  = ["sinkt","sinken","nimmtab","kleiner","faellt","tiefer"];
+  var ak = norm(ans);
+  if (ak === "steigt" && steigt.indexOf(n) >= 0) return true;
+  if (ak === "sinkt"  && sinkt.indexOf(n)  >= 0) return true;
   return false;
 }
 
-function mkInput(answer, alts, tableKey) {
-  const td_wrap = document.createElement("div");
-  td_wrap.className = "cell-wrap";
-  const inp = document.createElement("input");
-  inp.type="text"; inp.className="answer-input"; inp.placeholder="…";
-  inp.dataset.answer=answer;
-  inp.dataset.alts=JSON.stringify(alts||[]);
-  inp.dataset.table=tableKey;
-  inp.autocomplete="off"; inp.spellcheck=false;
-  const icon = document.createElement("span");
-  icon.className = "cell-icon";
-  td_wrap.appendChild(inp);
-  td_wrap.appendChild(icon);
-  return td_wrap;
+function mkPrefilled(text) {
+  var span = document.createElement("span");
+  span.className = "prefilled";
+  span.textContent = text;
+  return span;
 }
 
-function addCell(tr, content) {
-  const td = document.createElement("td");
-  if (typeof content === "string") {
-    td.innerHTML = content;
-  } else {
-    td.appendChild(content);
-  }
-  tr.appendChild(td);
+function mkInputCell(answer, alts, tableKey) {
+  var td = document.createElement("td");
+  var wrap = document.createElement("div");
+  wrap.className = "cell-wrap";
+  var inp = document.createElement("input");
+  inp.type = "text";
+  inp.className = "answer-input";
+  inp.placeholder = "...";
+  inp.setAttribute("data-answer", answer);
+  inp.setAttribute("data-alts", JSON.stringify(alts || []));
+  inp.setAttribute("data-table", tableKey);
+  inp.autocomplete = "off";
+  inp.spellcheck = false;
+  var icon = document.createElement("span");
+  icon.className = "cell-icon";
+  wrap.appendChild(inp);
+  wrap.appendChild(icon);
+  var hint = document.createElement("div");
+  hint.className = "hint";
+  td.appendChild(wrap);
+  td.appendChild(hint);
   return td;
 }
 
-function addInputCell(tr, answer, alts, tableKey) {
-  const td = document.createElement("td");
-  const wrap = mkInput(answer, alts, tableKey);
-  td.appendChild(wrap);
-  const hint = document.createElement("div");
-  hint.className="hint";
-  td.appendChild(hint);
-  tr.appendChild(td);
+function mkPrefilledCell(text) {
+  var td = document.createElement("td");
+  td.appendChild(mkPrefilled(text));
+  return td;
 }
 
-function addPrefilled(tr, text) {
-  const td = document.createElement("td");
-  const span = document.createElement("span");
-  span.className="prefilled";
-  span.textContent=text;
-  td.appendChild(span);
-  tr.appendChild(td);
-}
-
-// ── TAB 1: UMSTELLUNG ─────────────────────────────────
-
+// TAB 1
 function buildUmstellung() {
   resetScore("umstellung");
-  const tbody = document.getElementById("tbody-umstellung");
+  var tbody = document.getElementById("tbody-umstellung");
   tbody.innerHTML = "";
-  const rows = pick(UMST, 4);
-  // prefill cols 0,1,2 only (never 3=formel), one unique per row
-  const pfCols = shuffle([0,1,2,0,1,2]).slice(0,4);
-
-  rows.forEach((row,ri) => {
-    const tr = document.createElement("tr");
-    const pc = pfCols[ri];
-    // col 0: name
-    if(pc===0) addPrefilled(tr, row.name); else addInputCell(tr, row.name, [], "umstellung");
-    // col 1: symbol
-    if(pc===1) addPrefilled(tr, row.symbol); else addInputCell(tr, row.symbol, [], "umstellung");
-    // col 2: einheit
-    if(pc===2) addPrefilled(tr, row.einheit); else addInputCell(tr, row.einheit, [], "umstellung");
-    // col 3: formel – ALWAYS input
-    addInputCell(tr, row.formel, [], "umstellung");
+  var rows = pick(UMST, 4);
+  var pfOptions = shuffle([0, 1, 2, 0, 1, 2]);
+  for (var ri = 0; ri < rows.length; ri++) {
+    var row = rows[ri];
+    var pc = pfOptions[ri];
+    var tr = document.createElement("tr");
+    tr.appendChild(pc === 0 ? mkPrefilledCell(row.name)    : mkInputCell(row.name,    [], "umstellung"));
+    tr.appendChild(pc === 1 ? mkPrefilledCell(row.symbol)  : mkInputCell(row.symbol,  [], "umstellung"));
+    tr.appendChild(pc === 2 ? mkPrefilledCell(row.einheit) : mkInputCell(row.einheit, [], "umstellung"));
+    tr.appendChild(mkInputCell(row.formel, [], "umstellung"));
     tbody.appendChild(tr);
-  });
+  }
 }
 
-// ── TAB 2: SPEZIALGESETZE ─────────────────────────────
-
+// TAB 2
 function buildSpezial() {
   resetScore("spezial");
-  const tbody = document.getElementById("tbody-spezial");
+  var tbody = document.getElementById("tbody-spezial");
   tbody.innerHTML = "";
-  const rows = pick(SPEZ, 4);
-  const pfCols = shuffle([0,1,0,1]).slice(0,4);
+  var rows = pick(SPEZ, 4);
+  var pfOptions = shuffle([0, 1, 0, 1]);
+  for (var ri = 0; ri < rows.length; ri++) {
+    var row = rows[ri];
+    var pc = pfOptions[ri];
+    var tr = document.createElement("tr");
+    tr.appendChild(pc === 0 ? mkPrefilledCell(row.name)    : mkInputCell(row.name,    [], "spezial"));
+    tr.appendChild(pc === 1 ? mkPrefilledCell(row.konstant): mkInputCell(row.konstant, [], "spezial"));
 
-  rows.forEach((row,ri) => {
-    const tr = document.createElement("tr");
-    const pc = pfCols[ri];
-
-    // col 0: name
-    if(pc===0) addPrefilled(tr, row.name); else addInputCell(tr, row.name, [], "spezial");
-    // col 1: konstant
-    if(pc===1) addPrefilled(tr, row.konstant); else addInputCell(tr, row.konstant, [], "spezial");
-
-    // col 2: proportionality – one side shown, one is input
-    const td2 = document.createElement("td");
-    const showLeft = Math.random() > 0.5;
-    const propRow = document.createElement("div");
+    // Proportionalitaet
+    var td2 = document.createElement("td");
+    var propRow = document.createElement("div");
     propRow.className = "prop-row";
+    var showLeft = Math.random() > 0.5;
 
     if (showLeft) {
-      const lSpan = document.createElement("span");
+      var lSpan = document.createElement("span");
       lSpan.className = "prop-fixed prefilled";
       lSpan.textContent = row.left;
-      const tilde = document.createElement("span");
+      var tilde = document.createElement("span");
       tilde.className = "prop-tilde";
       tilde.textContent = " ~ ";
-      const wrap = mkInput(row.right, row.rightAlts, "spezial");
-      wrap.querySelector("input").classList.add("prop-input");
+      var inp = document.createElement("input");
+      inp.type = "text"; inp.className = "answer-input prop-input";
+      inp.placeholder = "...";
+      inp.setAttribute("data-answer", row.right);
+      inp.setAttribute("data-alts", JSON.stringify(row.rightAlts || []));
+      inp.setAttribute("data-table", "spezial");
+      inp.autocomplete = "off"; inp.spellcheck = false;
+      var icon = document.createElement("span"); icon.className = "cell-icon";
       propRow.appendChild(lSpan);
       propRow.appendChild(tilde);
-      propRow.appendChild(wrap);
+      propRow.appendChild(inp);
+      propRow.appendChild(icon);
     } else {
-      const wrap = mkInput(row.left, row.leftAlts, "spezial");
-      wrap.querySelector("input").classList.add("prop-input");
-      const tilde = document.createElement("span");
-      tilde.className = "prop-tilde";
-      tilde.textContent = " ~ ";
-      const rSpan = document.createElement("span");
-      rSpan.className = "prop-fixed prefilled";
-      rSpan.textContent = row.right;
-      propRow.appendChild(wrap);
-      propRow.appendChild(tilde);
+      var inp2 = document.createElement("input");
+      inp2.type = "text"; inp2.className = "answer-input prop-input";
+      inp2.placeholder = "...";
+      inp2.setAttribute("data-answer", row.left);
+      inp2.setAttribute("data-alts", JSON.stringify(row.leftAlts || []));
+      inp2.setAttribute("data-table", "spezial");
+      inp2.autocomplete = "off"; inp2.spellcheck = false;
+      var icon2 = document.createElement("span"); icon2.className = "cell-icon";
+      var tilde2 = document.createElement("span");
+      tilde2.className = "prop-tilde"; tilde2.textContent = " ~ ";
+      var rSpan = document.createElement("span");
+      rSpan.className = "prop-fixed prefilled"; rSpan.textContent = row.right;
+      propRow.appendChild(inp2);
+      propRow.appendChild(icon2);
+      propRow.appendChild(tilde2);
       propRow.appendChild(rSpan);
     }
 
-    const hint = document.createElement("div");
-    hint.className = "hint";
+    var hint2 = document.createElement("div"); hint2.className = "hint";
     td2.appendChild(propRow);
-    td2.appendChild(hint);
+    td2.appendChild(hint2);
     tr.appendChild(td2);
     tbody.appendChild(tr);
-  });
+  }
 }
 
-// ── TAB 3: QUALITATIV ─────────────────────────────────
-
+// TAB 3
 function buildQualitativ() {
   resetScore("qualitativ");
-  const tbody = document.getElementById("tbody-qualitativ");
+  var tbody = document.getElementById("tbody-qualitativ");
   tbody.innerHTML = "";
-  const rows = pick(QUAL, 5);
-
-  rows.forEach(row => {
-    const tr = document.createElement("tr");
-    row.cells.forEach(type => {
-      const td = document.createElement("td");
+  var rows = pick(QUAL, 5);
+  for (var ri = 0; ri < rows.length; ri++) {
+    var row = rows[ri];
+    var tr = document.createElement("tr");
+    for (var ci = 0; ci < 4; ci++) {
+      var type = row.cells[ci];
+      var td = document.createElement("td");
       if (type === "answer") {
-        const wrap = mkInput(row.result, [], "qualitativ");
-        td.appendChild(wrap);
-        const hint = document.createElement("div");
-        hint.className = "hint";
-        td.appendChild(hint);
+        var wrap = document.createElement("div"); wrap.className = "cell-wrap";
+        var inp3 = document.createElement("input");
+        inp3.type = "text"; inp3.className = "answer-input";
+        inp3.placeholder = "steigt / sinkt";
+        inp3.setAttribute("data-answer", row.result);
+        inp3.setAttribute("data-alts", "[]");
+        inp3.setAttribute("data-table", "qualitativ");
+        inp3.autocomplete = "off"; inp3.spellcheck = false;
+        var icon3 = document.createElement("span"); icon3.className = "cell-icon";
+        wrap.appendChild(inp3); wrap.appendChild(icon3);
+        var hint3 = document.createElement("div"); hint3.className = "hint";
+        td.appendChild(wrap); td.appendChild(hint3);
       } else if (type === "const") {
-        const span = document.createElement("span");
-        span.className = "tag-const";
-        span.textContent = "= const";
-        td.appendChild(span);
+        var span = document.createElement("span"); span.className = "tag-const";
+        span.textContent = "= const"; td.appendChild(span);
       } else if (type === "up") {
-        const span = document.createElement("span");
-        span.className = "tag-up";
-        span.textContent = "steigt \u2191";
-        td.appendChild(span);
+        var span2 = document.createElement("span"); span2.className = "tag-up";
+        span2.textContent = "steigt ↑"; td.appendChild(span2);
       } else if (type === "down") {
-        const span = document.createElement("span");
-        span.className = "tag-down";
-        span.textContent = "sinkt \u2193";
-        td.appendChild(span);
+        var span3 = document.createElement("span"); span3.className = "tag-down";
+        span3.textContent = "sinkt ↓"; td.appendChild(span3);
       }
       tr.appendChild(td);
-    });
+    }
     tbody.appendChild(tr);
-  });
+  }
 }
 
-// ── CHECK ─────────────────────────────────────────────
-
+// CHECK
 function checkTable(key) {
-  const inputs = document.querySelectorAll(`.answer-input[data-table="${key}"]`);
-  let correct=0, total=inputs.length;
-  inputs.forEach(inp => {
-    const ans = inp.dataset.answer;
-    const alts = JSON.parse(inp.dataset.alts||"[]");
-    const icon = inp.nextElementSibling;
-    const hint = inp.closest("td").querySelector(".hint");
+  var inputs = document.querySelectorAll(".answer-input[data-table='" + key + "']");
+  var correct = 0, total = inputs.length;
+  for (var i = 0; i < inputs.length; i++) {
+    var inp = inputs[i];
+    var ans = inp.getAttribute("data-answer");
+    var alts = JSON.parse(inp.getAttribute("data-alts") || "[]");
+    var icon = inp.nextElementSibling;
+    var hint = inp.closest("td").querySelector(".hint");
     if (matches(inp.value, ans, alts)) {
       inp.classList.remove("wrong"); inp.classList.add("correct");
-      if(icon) icon.textContent="✅";
-      if(hint) hint.classList.remove("show");
+      if (icon) icon.textContent = "OK";
+      if (hint) hint.classList.remove("show");
       correct++;
     } else {
       inp.classList.remove("correct"); inp.classList.add("wrong");
-      if(icon) icon.textContent="❌";
-      if(hint) { hint.innerHTML="Richtig: <strong>"+ans+"</strong>"; hint.classList.add("show"); }
+      if (icon) icon.textContent = "X";
+      if (hint) { hint.innerHTML = "Richtig: <strong>" + ans + "</strong>"; hint.classList.add("show"); }
     }
-    inp.disabled=true;
-  });
+    inp.disabled = true;
+  }
   showScore(key, correct, total);
 }
 
 function showScore(key, correct, total) {
-  const box=document.getElementById("score-"+key);
-  const num=document.getElementById("scorenum-"+key);
-  const msg=document.getElementById("scoremsg-"+key);
-  box.classList.remove("perfect","partial","poor","show");
-  num.textContent=correct+" / "+total;
-  if(correct===total){box.classList.add("perfect");msg.textContent="Ausgezeichnet! Alle Antworten richtig.";}
-  else if(correct>=total*0.6){box.classList.add("partial");msg.textContent="Gut! "+(total-correct)+" Feld"+(total-correct>1?"er":"")+" noch nicht richtig.";}
-  else{box.classList.add("poor");msg.textContent=(total-correct)+" von "+total+" Feldern falsch – schau dir die Hinweise an!";}
+  var box = document.getElementById("score-" + key);
+  var num = document.getElementById("scorenum-" + key);
+  var msg = document.getElementById("scoremsg-" + key);
+  box.classList.remove("perfect", "partial", "poor", "show");
+  num.textContent = correct + " / " + total;
+  if (correct === total) {
+    box.classList.add("perfect"); msg.textContent = "Ausgezeichnet! Alle Antworten richtig.";
+  } else if (correct >= total * 0.6) {
+    box.classList.add("partial"); msg.textContent = "Gut! " + (total - correct) + " Feld(er) noch nicht richtig.";
+  } else {
+    box.classList.add("poor"); msg.textContent = (total - correct) + " von " + total + " Feldern falsch.";
+  }
   box.classList.add("show");
-  box.scrollIntoView({behavior:"smooth",block:"nearest"});
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function resetScore(key) {
-  document.getElementById("score-"+key).classList.remove("show");
+  document.getElementById("score-" + key).classList.remove("show");
 }
 
 function switchTab(id) {
-  ["umstellung","spezial","qualitativ"].forEach((t,i) => {
-    document.querySelectorAll(".tab-btn")[i].classList.toggle("active",t===id);
-    document.getElementById("tab-"+t).classList.toggle("active",t===id);
-  });
+  var ids = ["umstellung", "spezial", "qualitativ"];
+  var btns = document.querySelectorAll(".tab-btn");
+  for (var i = 0; i < ids.length; i++) {
+    btns[i].classList.toggle("active", ids[i] === id);
+    document.getElementById("tab-" + ids[i]).classList.toggle("active", ids[i] === id);
+  }
 }
 
 buildUmstellung();
 buildSpezial();
 buildQualitativ();
-<\/script>
+</script>
 </body>
 </html>
