@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chemisches Gleichgewicht</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700&display=swap');
+:root {
+  --bg:#0f1117; --panel:#181c27; --panel2:#1f2336; --border:#2e3450;
+  --orange:#f97316; --blue:#38bdf8; --green:#4ade80; --red:#f87171;
+  --purple:#a78bfa; --yellow:#fbbf24; --pink:#f472b6;
+  --text:#e2e8f0; --muted:#64748b;
+  --font:'Inter',system-ui,sans-serif; --mono:'Share Tech Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px;}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#0f1117,#1a1f35);border-bottom:1px solid var(--border);
+  padding:20px 28px;display:flex;align-items:center;gap:16px;}
+.header h1{font-size:1.4rem;font-weight:700;color:var(--text);}
+.header h1 span{color:var(--orange);}
+.header p{font-size:0.8rem;color:var(--muted);margin-top:2px;}
+
+.main{max-width:1100px;margin:0 auto;padding:24px 16px;display:flex;flex-direction:column;gap:18px;}
+
+/* CARD */
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px 22px;}
+.card-title{font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-title .dot{width:7px;height:7px;border-radius:50%;background:var(--orange);}
+
+/* REACTION DISPLAY */
+.reaction-wrap{display:flex;align-items:center;justify-content:center;gap:10px;
+  flex-wrap:wrap;padding:18px 10px;background:#0b0d15;border-radius:10px;border:1px solid var(--border);
+  font-size:1.15rem;font-weight:600;letter-spacing:0.3px;}
+.r-edukt{color:#38bdf8;}
+.r-produkt{color:#4ade80;}
+.r-arrow{color:var(--muted);font-size:1.4rem;margin:0 6px;}
+.r-plus{color:var(--muted);margin:0 4px;}
+.r-coeff{color:var(--yellow);}
+.r-highlight-left .r-edukt{text-shadow:0 0 12px #38bdf8;color:#93c5fd;}
+.r-highlight-right .r-produkt{text-shadow:0 0 12px #4ade80;color:#86efac;}
+
+/* CHANGE DISPLAY */
+.change-box{display:flex;align-items:center;gap:12px;padding:14px 18px;
+  background:var(--panel2);border-radius:10px;border:1.5px solid var(--yellow);flex-wrap:wrap;}
+.change-label{font-size:0.72rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--yellow);}
+.change-desc{font-size:0.95rem;font-weight:600;color:var(--text);}
+.change-badge{padding:4px 12px;border-radius:20px;font-size:0.78rem;font-weight:700;
+  background:rgba(251,191,36,0.15);border:1px solid var(--yellow);color:var(--yellow);}
+
+/* GUESS BUTTONS */
+.guess-section{display:flex;flex-direction:column;gap:12px;align-items:center;}
+.guess-label{font-size:0.8rem;color:var(--muted);text-align:center;}
+.guess-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;}
+.guess-btn{padding:13px 32px;border-radius:10px;border:2px solid;font-family:var(--font);
+  font-size:0.95rem;font-weight:700;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:8px;}
+.guess-btn:active{transform:scale(0.97);}
+.btn-left{background:rgba(56,189,248,0.1);border-color:var(--blue);color:var(--blue);}
+.btn-left:hover{background:rgba(56,189,248,0.22);}
+.btn-right{background:rgba(74,222,128,0.1);border-color:var(--green);color:var(--green);}
+.btn-right:hover{background:rgba(74,222,128,0.22);}
+.btn-correct{background:rgba(74,222,128,0.25);border-color:var(--green);color:var(--green);}
+.btn-wrong{background:rgba(248,113,113,0.2);border-color:var(--red);color:var(--red);}
+
+/* SIMULATION CANVAS */
+#simCanvas{width:100%;height:220px;border-radius:10px;background:#0b0d15;
+  border:1px solid var(--border);display:block;}
+
+/* BARS */
+.bars-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px;}
+.bar-item{}
+.bar-label{font-size:0.75rem;font-weight:600;color:var(--muted);margin-bottom:5px;
+  display:flex;justify-content:space-between;}
+.bar-label span{font-family:var(--mono);color:var(--text);}
+.bar-bg{height:10px;background:var(--panel2);border-radius:5px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:5px;transition:width 0.8s cubic-bezier(.4,0,.2,1);}
+
+/* SLIDERS */
+.slider-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.slider-item label{font-size:0.75rem;color:var(--muted);font-weight:600;
+  display:flex;justify-content:space-between;margin-bottom:6px;}
+.slider-item label span{color:var(--orange);font-family:var(--mono);}
+input[type=range]{width:100%;-webkit-appearance:none;height:5px;border-radius:3px;
+  background:var(--border);outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
+  border-radius:50%;background:var(--orange);cursor:pointer;border:2px solid #0f1117;}
+
+/* RESULT */
+.result-box{border-radius:10px;padding:16px 20px;border:2px solid;display:none;}
+.result-box.show{display:block;}
+.result-box.correct{background:rgba(74,222,128,0.08);border-color:var(--green);}
+.result-box.wrong{background:rgba(248,113,113,0.08);border-color:var(--red);}
+.result-header{font-size:1rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.result-body{font-size:0.85rem;color:#94a3b8;line-height:1.7;}
+.result-body strong{color:var(--text);}
+.result-body .formula{font-family:var(--mono);background:rgba(249,115,22,0.1);
+  padding:3px 8px;border-radius:4px;color:var(--orange);display:inline;}
+
+/* NEXT BTN */
+.next-btn{display:none;width:100%;padding:13px;border-radius:10px;border:2px solid var(--orange);
+  background:rgba(249,115,22,0.1);color:var(--orange);font-family:var(--font);font-size:0.95rem;
+  font-weight:700;cursor:pointer;transition:all 0.15s;margin-top:12px;}
+.next-btn:hover{background:rgba(249,115,22,0.22);}
+.next-btn.show{display:block;}
+
+/* LEGEND */
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:0.76rem;color:var(--muted);}
+.legend-dot{width:10px;height:10px;border-radius:50%;}
+
+/* SCORE */
+.score-row{display:flex;gap:20px;justify-content:flex-end;align-items:center;flex-wrap:wrap;}
+.score-item{font-size:0.78rem;color:var(--muted);}
+.score-item span{font-family:var(--mono);font-size:1rem;font-weight:700;}
+.score-item .s-correct{color:var(--green);}
+.score-item .s-wrong{color:var(--red);}
+
+@media(max-width:640px){
+  .bars-grid{grid-template-columns:1fr;}
+  .slider-grid{grid-template-columns:1fr;}
+  .guess-btns{flex-direction:column;width:100%;}
+  .guess-btn{justify-content:center;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="font-size:2rem">&#x2696;</div>
+  <div>
+    <h1>Chemisches <span>Gleichgewicht</span></h1>
+    <p>Le Chatelier &middot; Massenerhaltung &middot; Gleichgewichtskonstante K</p>
+  </div>
+  <div class="score-row" style="margin-left:auto;">
+    <div class="score-item">Richtig: <span class="s-correct" id="sCorrect">0</span></div>
+    <div class="score-item">Falsch: <span class="s-wrong" id="sWrong">0</span></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- REACTION -->
+  <div class="card">
+    <div class="card-title"><div class="dot"></div>Reaktionsgleichung</div>
+    <div class="reaction-wrap" id="reactionDisplay">–</div>
+    <div style="margin-top:10px;font-size:0.76rem;color:var(--muted);text-align:center" id="reactionName"></div>
+  </div>
+
+  <!-- CHANGE -->
+  <div class="card" id="changeCard">
+    <div class="card-title"><div class="dot" style="background:var(--yellow)"></div>St&ouml;rung des Gleichgewichts</div>
+    <div class="change-box">
+      <div class="change-label">&#x26A1; &Auml;nderung</div>
+      <div class="change-desc" id="changeDesc">–</div>
+      <div class="change-badge" id="changeBadge">–</div>
+    </div>
+  </div>
+
+  <!-- GUESS -->
+  <div class="card" id="guessCard">
+    <div class="card-title"><div class="dot" style="background:var(--purple)"></div>Deine Einsch&auml;tzung</div>
+    <div class="guess-section">
+      <div class="guess-label">In welche Richtung verschiebt sich das Gleichgewicht?</div>
+      <div class="guess-btns">
+        <button class="guess-btn btn-left" id="btnLeft" onclick="makeGuess('left')">
+          &#x2190; Eduktseite
+        </button>
+        <button class="guess-btn btn-right" id="btnRight" onclick="makeGuess('right')">
+          Produktseite &#x2192;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIMULATION -->
+  <div class="card" id="simCard" style="display:none">
+    <div class="card-title"><div class="dot" style="background:var(--blue)"></div>Simulation &mdash; Teilchenbewegung</div>
+    <canvas id="simCanvas"></canvas>
+    <div class="legend" style="margin-top:12px">
+      <div class="legend-item"><div class="legend-dot" style="background:#38bdf8"></div><span id="leg0">Edukt A</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#818cf8"></div><span id="leg1">Edukt B</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div><span id="leg2">Produkt C</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fb923c"></div><span id="leg3">Produkt D</span></div>
+    </div>
+
+    <div style="margin-top:18px">
+      <div class="card-title" style="margin-bottom:10px"><div class="dot" style="background:var(--green)"></div>Konzentrationen</div>
+      <div class="bars-grid" id="barsGrid"></div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="card" id="resultCard" style="display:none">
+    <div class="card-title"><div class="dot" style="background:var(--pink)"></div>Auswertung</div>
+    <div class="result-box" id="resultBox">
+      <div class="result-header" id="resultHeader"></div>
+      <div class="result-body" id="resultBody"></div>
+    </div>
+    <button class="next-btn" id="nextBtn" onclick="nextRound()">&#x21BB; N&auml;chste Frage</button>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// DATA: 10 reactions
+// ============================================================
+var REACTIONS = [
+  {
+    name: "Haber-Bosch-Verfahren (Ammoniaksynthese)",
+    edukte: [{s:"N₂",c:0,col:"#38bdf8"},{s:"3 H₂",c:0,col:"#818cf8"}],
+    produkte: [{s:"2 NH₃",c:0,col:"#4ade80"}],
+    deltaH: -92, deltaN: -2, K_ref: 977,
+    changes: [
+      { type:"conc", side:"edukt", species:"N₂", dir:"erhöht", desc:"Konzentration von N₂ wird erhöht", correct:"right",
+        explain:"Mehr N₂ auf der Eduktseite → System reagiert durch Verbrauch von N₂ → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong> (mehr NH₃ gebildet)." },
+      { type:"temp", dir:"erhöht", desc:"Temperatur wird erhöht", correct:"left",
+        explain:"Die Reaktion ist <strong>exotherm (ΔH = −92 kJ/mol)</strong>. Wärmezufuhr begünstigt die Rückreaktion → Gleichgewicht verschiebt sich zur <strong>Eduktseite</strong>." },
+      { type:"press", dir:"erhöht", desc:"Druck wird erhöht", correct:"right",
+        explain:"Bei Druckerhöhung verschiebt sich das Gleichgewicht zur Seite mit weniger Gasmol. Hier: 4 Mol Edukte → 2 Mol Produkt → Verschiebung zur <strong>Produktseite</strong>." }
+    ]
+  },
+  {
+    name: "Schwefeldioxid-Oxidation (Kontaktverfahren)",
+    edukte: [{s:"2 SO₂",c:0,col:"#38bdf8"},{s:"O₂",c:0,col:"#818cf8"}],
+    produkte: [{s:"2 SO₃",c:0,col:"#4ade80"}],
+    deltaH: -198, deltaN: -1, K_ref: 1e10,
+    changes: [
+      { type:"conc", side:"edukt", species:"O₂", dir:"erhöht", desc:"Konzentration von O₂ wird erhöht", correct:"right",
+        explain:"Mehr O₂ → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong>, um den Überschuss auszugleichen." },
+      { type:"temp", dir:"gesenkt", desc:"Temperatur wird gesenkt", correct:"right",
+        explain:"Exotherme Reaktion (ΔH = −198 kJ/mol). Abkühlung begünstigt die Wärme freisetzende Hinreaktion → <strong>Produktseite</strong>." },
+      { type:"press", dir:"erhöht", desc:"Druck wird erhöht", correct:"right",
+        explain:"3 Mol Edukte → 2 Mol Produkte. Druckerhöhung begünstigt die Seite mit weniger Gasmol → <strong>Produktseite</strong>." }
+    ]
+  },
+  {
+    name: "Stickstoffdioxid-Gleichgewicht (braun ⇌ farblos)",
+    edukte: [{s:"N₂O₄",c:0,col:"#38bdf8"}],
+    produkte: [{s:"2 NO₂",c:0,col:"#fb923c"}],
+    deltaH: +57, deltaN: +1, K_ref: 0.14,
+    changes: [
+      { type:"temp", dir:"erhöht", desc:"Temperatur wird erhöht", correct:"right",
+        explain:"Endotherme Reaktion (ΔH = +57 kJ/mol). Wärmezufuhr begünstigt die Hinreaktion → mehr NO₂ (braun) gebildet → <strong>Produktseite</strong>. Sichtbar: Gasmischung färbt sich dunkler." },
+      { type:"press", dir:"erhöht", desc:"Druck wird erhöht", correct:"left",
+        explain:"1 Mol Edukt → 2 Mol Produkte. Druckerhöhung begünstigt die Seite mit weniger Gasmol → <strong>Eduktseite</strong>. Gasmischung entfärbt sich (mehr N₂O₄)." },
+      { type:"conc", side:"produkt", species:"NO₂", dir:"entnommen", desc:"NO₂ wird aus dem System entfernt", correct:"right",
+        explain:"Entnahme von NO₂ (Produkt) → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong>, um den Verlust auszugleichen." }
+    ]
+  },
+  {
+    name: "Chromat-Dichromat-Gleichgewicht (Farbreaktion)",
+    edukte: [{s:"2 CrO₄²⁻",c:0,col:"#fbbf24"},{s:"2 H⁺",c:0,col:"#818cf8"}],
+    produkte: [{s:"Cr₂O₇²⁻",c:0,col:"#fb923c"},{s:"H₂O",c:0,col:"#38bdf8"}],
+    deltaH: -20, deltaN: 0, K_ref: 4.2e14,
+    changes: [
+      { type:"conc", side:"edukt", species:"H⁺", dir:"erhöht", desc:"Säure (HCl) wird zugegeben → H⁺ steigt", correct:"right",
+        explain:"Mehr H⁺ (Edukt) → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong> → mehr Dichromat (orange) entsteht. Lösung färbt sich von gelb nach orange." },
+      { type:"conc", side:"edukt", species:"OH⁻", dir:"erhöht", desc:"Lauge (NaOH) wird zugegeben → H⁺ sinkt", correct:"left",
+        explain:"OH⁻ neutralisiert H⁺ → H⁺-Konzentration sinkt → Gleichgewicht verschiebt sich zur <strong>Eduktseite</strong> → mehr Chromat (gelb). Lösung färbt sich von orange nach gelb." },
+      { type:"temp", dir:"erhöht", desc:"Temperatur wird erhöht", correct:"left",
+        explain:"Leicht exotherme Reaktion. Temperatureröhung begünstigt Rückreaktion → <strong>Eduktseite</strong> (mehr gelbes Chromat)." }
+    ]
+  },
+  {
+    name: "Wassergasgleichgewicht (CO-Shift)",
+    edukte: [{s:"CO",c:0,col:"#38bdf8"},{s:"H₂O",c:0,col:"#818cf8"}],
+    produkte: [{s:"CO₂",c:0,col:"#4ade80"},{s:"H₂",c:0,col:"#fb923c"}],
+    deltaH: -41, deltaN: 0, K_ref: 3.4,
+    changes: [
+      { type:"conc", side:"edukt", species:"H₂O", dir:"erhöht", desc:"Dampfmenge (H₂O) wird erhöht", correct:"right",
+        explain:"Mehr Edukt H₂O → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong> → mehr H₂ und CO₂ entstehen. Technisch genutzt zur H₂-Herstellung." },
+      { type:"temp", dir:"erhöht", desc:"Temperatur wird erhöht", correct:"left",
+        explain:"Exotherme Reaktion (ΔH = −41 kJ/mol). Temperatureröhung begünstigt die Rückreaktion → <strong>Eduktseite</strong>." },
+      { type:"conc", side:"produkt", species:"H₂", dir:"entnommen", desc:"H₂ wird kontinuierlich abgeleitet", correct:"right",
+        explain:"Entnahme des Produkts H₂ → System reagiert durch Bildung von mehr H₂ → <strong>Produktseite</strong>. Prinzip der technischen H₂-Gewinnung." }
+    ]
+  },
+  {
+    name: "Calciumcarbonat-Zerfall (Kalkbrennen)",
+    edukte: [{s:"CaCO₃",c:0,col:"#94a3b8"}],
+    produkte: [{s:"CaO",c:0,col:"#4ade80"},{s:"CO₂",c:0,col:"#fb923c"}],
+    deltaH: +178, deltaN: 0, K_ref: 0.0039,
+    changes: [
+      { type:"temp", dir:"erhöht", desc:"Temperatur wird stark erhöht (>800°C)", correct:"right",
+        explain:"Stark endotherme Reaktion (ΔH = +178 kJ/mol). Mehr Wärme begünstigt den Zerfall → <strong>Produktseite</strong>. Grundlage des Kalkbrennens bei ~900°C." },
+      { type:"conc", side:"produkt", species:"CO₂", dir:"entnommen", desc:"CO₂ wird abgeleitet (Ofen belüftet)", correct:"right",
+        explain:"Entnahme von CO₂ → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong> → mehr CaCO₃ zerfällt. Technisch: kontinuierliche Belüftung des Brennofens." },
+      { type:"press", dir:"erhöht", desc:"CO₂-Partialdruck wird erhöht", correct:"left",
+        explain:"Mehr CO₂ (Produkt) im System → Gleichgewicht verschiebt sich zur <strong>Eduktseite</strong> → CaCO₃ wird zurückgebildet." }
+    ]
+  },
+  {
+    name: "Essigsaeure-Gleichgewicht (schwache Säure)",
+    edukte: [{s:"CH₃COOH",c:0,col:"#38bdf8"},{s:"H₂O",c:0,col:"#818cf8"}],
+    produkte: [{s:"CH₃COO⁻",c:0,col:"#4ade80"},{s:"H₃O⁺",c:0,col:"#fb923c"}],
+    deltaH: -1, deltaN: 0, K_s: 1.8e-5,
+    changes: [
+      { type:"conc", side:"produkt", species:"H₃O⁺", dir:"erhöht", desc:"Starke Säure (HCl) wird zugegeben", correct:"left",
+        explain:"HCl gibt H₃O⁺ ab → Produkt-Konzentration steigt → Gleichgewicht verschiebt sich zur <strong>Eduktseite</strong> (Rückreaktion). pH sinkt, Dissoziation der Essigsäure nimmt ab." },
+      { type:"conc", side:"edukt", species:"CH₃COOH", dir:"erhöht", desc:"Mehr Essigsäure wird zugegeben", correct:"right",
+        explain:"Mehr Essigsäure (Edukt) → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong> → mehr Acetat und H₃O⁺ gebildet." },
+      { type:"conc", side:"produkt", species:"CH₃COO⁻", dir:"entnommen", desc:"Acetat wird als unlossliches Salz gefällt", correct:"right",
+        explain:"Entnahme von Acetat (Produkt) → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong> → mehr Dissoziation der Essigsäure." }
+    ]
+  },
+  {
+    name: "Eisenthiocyanat-Gleichgewicht (Blutrot-Reaktion)",
+    edukte: [{s:"Fe³⁺",c:0,col:"#fbbf24"},{s:"SCN⁻",c:0,col:"#818cf8"}],
+    produkte: [{s:"[Fe(SCN)]²⁺",c:0,col:"#f87171"}],
+    deltaH: -15, deltaN: 0, K_ref: 1.1e3,
+    changes: [
+      { type:"conc", side:"edukt", species:"Fe³⁺", dir:"erhöht", desc:"Fe³⁺ wird zugegeben (FeCl₃-Lösung)", correct:"right",
+        explain:"Mehr Fe³⁺ (Edukt) → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong> → mehr blutroter [Fe(SCN)]²⁺-Komplex. Lösung wird intensiver rot." },
+      { type:"conc", side:"edukt", species:"SCN⁻", dir:"erhöht", desc:"KSCN-Lösung wird zugegeben", correct:"right",
+        explain:"Mehr SCN⁻ (Edukt) → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong> → Intensivierung der Rotfärbung." },
+      { type:"conc", side:"produkt", species:"[Fe(SCN)]²⁺", dir:"verringert", desc:"Fluorid (F⁻) wird zugegeben → Fe³⁺ wird gebunden", correct:"left",
+        explain:"F⁻ bildet stabilen [FeF₆]³⁻-Komplex → freies Fe³⁺ sinkt → Gleichgewicht verschiebt sich zur <strong>Eduktseite</strong>. Lösung entfärbt sich." }
+    ]
+  },
+  {
+    name: "Stickoxid-Bildung (Verbrennungsreaktion)",
+    edukte: [{s:"N₂",c:0,col:"#38bdf8"},{s:"O₂",c:0,col:"#818cf8"}],
+    produkte: [{s:"2 NO",c:0,col:"#fb923c"}],
+    deltaH: +180, deltaN: 0, K_ref: 1e-30,
+    changes: [
+      { type:"temp", dir:"erhöht", desc:"Temperatur wird stark erhöht (Blitz, Motor)", correct:"right",
+        explain:"Stark endotherme Reaktion (ΔH = +180 kJ/mol). Sehr hohe Temperaturen (>2000°C) begünstigen NO-Bildung → <strong>Produktseite</strong>. Relevanz: Motoremissionen, Blitzentladung." },
+      { type:"conc", side:"edukt", species:"O₂", dir:"erhöht", desc:"Sauerstoffkonzentration wird erhöht", correct:"right",
+        explain:"Mehr O₂ (Edukt) → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong> → mehr NO gebildet." },
+      { type:"temp", dir:"gesenkt", desc:"System wird schnell abgekühlt (Abgasabkühlung)", correct:"left",
+        explain:"Abkühlung begünstigt die exotherme Rückreaktion → <strong>Eduktseite</strong>. Problem: Bei schneller Abkühlung „friert“ NO ein (kinetische Hemmung)." }
+    ]
+  },
+  {
+    name: "Kohlensäure-Gleichgewicht (Sprudel/Blut)",
+    edukte: [{s:"CO₂",c:0,col:"#38bdf8"},{s:"H₂O",c:0,col:"#818cf8"}],
+    produkte: [{s:"H₂CO₃",c:0,col:"#4ade80"}],
+    deltaH: -20, deltaN: 0, K_ref: 1.7e-3,
+    changes: [
+      { type:"conc", side:"edukt", species:"CO₂", dir:"erhöht", desc:"CO₂-Druck erhöht (Sprudelflasche verschlossen)", correct:"right",
+        explain:"Mehr CO₂ (Edukt) → Gleichgewicht verschiebt sich zur <strong>Produktseite</strong> → mehr H₂CO₃ → Lösung wird saurer. Alltagsbeispiel: Kohlensäure in Sprudelwasser." },
+      { type:"press", dir:"gesenkt", desc:"Flasche wird geöffnet (Druck sinkt)", correct:"left",
+        explain:"CO₂-Partialdruck sinkt → Gleichgewicht verschiebt sich zur <strong>Eduktseite</strong> → CO₂ entweicht als Gas. Alltagsbeispiel: Sprudel verliert Kohlensäure nach dem Öffnen." },
+      { type:"temp", dir:"erhöht", desc:"Temperatur wird erhöht", correct:"left",
+        explain:"Exotherme Reaktion. Erwärmen begünstigt Rückreaktion → <strong>Eduktseite</strong> → mehr CO₂ entweicht. Deshalb verliert warmes Sprudelwasser schneller Kohlensäure." }
+    ]
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+var currentReaction = null;
+var currentChange = null;
+var userGuess = null;
+var score = { correct: 0, wrong: 0 };
+var particles = [];
+var animId = null;
+var canvas, ctx;
+var phase = 'guess'; // 'guess' | 'result'
+
+// Species counts for animation
+var counts = { a: 20, b: 20, c: 10, d: 10 };
+var targetCounts = { a: 20, b: 20, c: 10, d: 10 };
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload = function() {
+  canvas = document.getElementById('simCanvas');
+  ctx = canvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  nextRound();
+};
+
+function resizeCanvas() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight || 220;
+}
+
+// ============================================================
+// ROUND LOGIC
+// ============================================================
+function nextRound() {
+  phase = 'guess';
+  userGuess = null;
+
+  // Pick random reaction
+  currentReaction = REACTIONS[Math.floor(Math.random() * REACTIONS.length)];
+  // Pick random change
+  currentChange = currentReaction.changes[Math.floor(Math.random() * currentReaction.changes.length)];
+
+  // Reset UI
+  document.getElementById('simCard').style.display = 'none';
+  document.getElementById('resultCard').style.display = 'none';
+  document.getElementById('guessCard').style.display = 'block';
+  document.getElementById('btnLeft').className = 'guess-btn btn-left';
+  document.getElementById('btnRight').className = 'guess-btn btn-right';
+  document.getElementById('resultBox').className = 'result-box';
+  document.getElementById('nextBtn').className = 'next-btn';
+
+  renderReaction(null);
+  renderChange();
+  renderLegend();
+
+  // Init particles
+  initCounts();
+  initParticles();
+  if (animId) cancelAnimationFrame(animId);
+  // Don't start animation yet
+}
+
+function initCounts() {
+  counts.a = 22; counts.b = 18; counts.c = 10; counts.d = 8;
+  targetCounts = { a: counts.a, b: counts.b, c: counts.c, d: counts.d };
+}
+
+// ============================================================
+// RENDER REACTION
+// ============================================================
+function renderReaction(highlight) {
+  var rx = currentReaction;
+  var div = document.getElementById('reactionDisplay');
+  var html = '';
+
+  // Build edukt side
+  rx.edukte.forEach(function(e, i) {
+    if (i > 0) html += '<span class="r-plus">+</span>';
+    html += '<span class="r-edukt">' + e.s + '</span>';
+  });
+
+  // Arrow
+  var arrowColor = '';
+  if (highlight === 'right') arrowColor = 'style="color:#4ade80"';
+  else if (highlight === 'left') arrowColor = 'style="color:#38bdf8"';
+  html += '<span class="r-arrow" ' + arrowColor + '>';
+  if (highlight === 'right') html += '&#x21CF;';
+  else if (highlight === 'left') html += '&#x21CD;';
+  else html += '&#x21CC;';
+  html += '</span>';
+
+  // Produkt side
+  rx.produkte.forEach(function(p, i) {
+    if (i > 0) html += '<span class="r-plus">+</span>';
+    html += '<span class="r-produkt">' + p.s + '</span>';
+  });
+
+  // Thermodynamic info
+  var dH = rx.deltaH;
+  var dHStr = (dH > 0 ? '+' : '') + dH + ' kJ/mol';
+  var dHColor = dH > 0 ? '#f87171' : '#4ade80';
+  html += '<span style="font-size:0.72rem;color:' + dHColor + ';margin-left:10px;font-family:var(--mono)">\u0394H = ' + dHStr + '</span>';
+
+  div.innerHTML = html;
+
+  // Highlight border
+  div.className = 'reaction-wrap';
+  if (highlight === 'right') div.style.borderColor = '#4ade80';
+  else if (highlight === 'left') div.style.borderColor = '#38bdf8';
+  else div.style.borderColor = 'var(--border)';
+
+  document.getElementById('reactionName').textContent = rx.name;
+}
+
+// ============================================================
+// RENDER CHANGE
+// ============================================================
+function renderChange() {
+  var ch = currentChange;
+  var icons = { conc: '&#x1F9EA;', temp: '&#x1F321;', press: '&#x1F4A8;' };
+  var labels = { conc: 'Konzentration', temp: 'Temperatur', press: 'Druck' };
+  document.getElementById('changeDesc').innerHTML = icons[ch.type] + ' ' + ch.desc;
+  document.getElementById('changeBadge').textContent = labels[ch.type] + ' ' + ch.dir;
+}
+
+// ============================================================
+// RENDER LEGEND
+// ============================================================
+function renderLegend() {
+  var rx = currentReaction;
+  var all = [];
+  rx.edukte.forEach(function(e) { all.push({ name: e.s, col: e.col }); });
+  rx.produkte.forEach(function(p) { all.push({ name: p.s, col: p.col }); });
+  var colors = ['#38bdf8','#818cf8','#4ade80','#fb923c'];
+  var ids = ['leg0','leg1','leg2','leg3'];
+  ids.forEach(function(id, i) {
+    var el = document.getElementById(id);
+    el.parentElement.style.display = i < all.length ? 'flex' : 'none';
+    if (i < all.length) el.textContent = all[i].name;
+    el.parentElement.querySelector('.legend-dot').style.background = colors[i];
+  });
+}
+
+// ============================================================
+// PARTICLES
+// ============================================================
+var PCOLORS = ['#38bdf8','#818cf8','#4ade80','#fb923c'];
+
+function initParticles() {
+  particles = [];
+  var rx = currentReaction;
+  var allSpecies = [];
+  rx.edukte.forEach(function(e, i) { allSpecies.push({ key: i === 0 ? 'a' : 'b', col: PCOLORS[i], label: e.s }); });
+  rx.produkte.forEach(function(p, i) { allSpecies.push({ key: i === 0 ? 'c' : 'd', col: PCOLORS[rx.edukte.length + i], label: p.s }); });
+
+  var cW = canvas.width || 600;
+  var cH = canvas.height || 220;
+
+  function addP(key, col, n) {
+    for (var i = 0; i < n; i++) {
+      particles.push({
+        key: key, col: col,
+        x: 10 + Math.random() * (cW - 20),
+        y: 10 + Math.random() * (cH - 20),
+        vx: (Math.random() - 0.5) * 1.4,
+        vy: (Math.random() - 0.5) * 1.4,
+        r: 5, alive: true,
+        opacity: 1
+      });
+    }
+  }
+
+  allSpecies.forEach(function(sp) {
+    addP(sp.key, sp.col, counts[sp.key]);
+  });
+}
+
+function drawParticles() {
+  if (!ctx) return;
+  var cW = canvas.width;
+  var cH = canvas.height;
+  ctx.clearRect(0, 0, cW, cH);
+  ctx.fillStyle = '#0b0d15';
+  ctx.fillRect(0, 0, cW, cH);
+
+  particles.forEach(function(p) {
+    if (!p.alive) return;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = p.col;
+    ctx.globalAlpha = p.opacity || 1;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+}
+
+function moveParticles() {
+  var cW = canvas.width;
+  var cH = canvas.height;
+  particles.forEach(function(p) {
+    if (!p.alive) return;
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.x < p.r) { p.x = p.r; p.vx = Math.abs(p.vx); }
+    if (p.x > cW - p.r) { p.x = cW - p.r; p.vx = -Math.abs(p.vx); }
+    if (p.y < p.r) { p.y = p.r; p.vy = Math.abs(p.vy); }
+    if (p.y > cH - p.r) { p.y = cH - p.r; p.vy = -Math.abs(p.vy); }
+  });
+}
+
+function animLoop() {
+  moveParticles();
+  drawParticles();
+  updateBars();
+  animId = requestAnimationFrame(animLoop);
+}
+
+// ============================================================
+// ANIMATE SHIFT
+// ============================================================
+function animateShift(direction) {
+  // direction: 'right' = mehr Produkte, 'left' = mehr Edukte, 'neutral' = nichts
+  var rx = currentReaction;
+  var eCount = rx.edukte.length;
+  var pCount = rx.produkte.length;
+
+  if (direction === 'right') {
+    // Edukte sinken, Produkte steigen
+    targetCounts.a = Math.max(4, counts.a - 10);
+    if (eCount > 1) targetCounts.b = Math.max(4, counts.b - 8);
+    targetCounts.c = counts.c + 12;
+    if (pCount > 1) targetCounts.d = counts.d + 8;
+  } else if (direction === 'left') {
+    targetCounts.a = counts.a + 12;
+    if (eCount > 1) targetCounts.b = counts.b + 8;
+    targetCounts.c = Math.max(4, counts.c - 10);
+    if (pCount > 1) targetCounts.d = Math.max(4, counts.d - 8);
+  }
+  // neutral: no change
+
+  // Gradually add/remove particles
+  var steps = 0;
+  var maxSteps = 60;
+  var colors = ['#38bdf8','#818cf8','#4ade80','#fb923c'];
+  var keys = ['a','b','c','d'];
+
+  var interval = setInterval(function() {
+    steps++;
+    keys.forEach(function(k, ki) {
+      var current = particles.filter(function(p) { return p.key === k && p.alive; }).length;
+      var target = targetCounts[k];
+      if (current < target) {
+        // Add a particle
+        var cW = canvas.width;
+        var cH = canvas.height;
+        particles.push({
+          key: k, col: colors[ki],
+          x: 10 + Math.random() * (cW - 20),
+          y: 10 + Math.random() * (cH - 20),
+          vx: (Math.random() - 0.5) * 1.4,
+          vy: (Math.random() - 0.5) * 1.4,
+          r: 5, alive: true, opacity: 1
+        });
+      } else if (current > target) {
+        // Remove a particle (fade out last)
+        for (var i = particles.length - 1; i >= 0; i--) {
+          if (particles[i].key === k && particles[i].alive) {
+            particles[i].alive = false;
+            break;
+          }
+        }
+      }
+      counts[k] = particles.filter(function(p) { return p.key === k && p.alive; }).length;
+    });
+    if (steps >= maxSteps) clearInterval(interval);
+  }, 50);
+}
+
+// ============================================================
+// BARS
+// ============================================================
+function buildBars() {
+  var rx = currentReaction;
+  var grid = document.getElementById('barsGrid');
+  grid.innerHTML = '';
+  var all = [];
+  rx.edukte.forEach(function(e, i) { all.push({ name: e.s, key: i === 0 ? 'a' : 'b', col: PCOLORS[i] }); });
+  rx.produkte.forEach(function(p, i) { all.push({ name: p.s, key: i === 0 ? 'c' : 'd', col: PCOLORS[rx.edukte.length + i] }); });
+  all.forEach(function(sp) {
+    var div = document.createElement('div');
+    div.className = 'bar-item';
+    div.innerHTML = '<div class="bar-label">' + sp.name +
+      ' <span id="cnt_' + sp.key + '">' + counts[sp.key] + '</span></div>' +
+      '<div class="bar-bg"><div class="bar-fill" id="bar_' + sp.key + '" style="width:50%;background:' + sp.col + '"></div></div>';
+    grid.appendChild(div);
+  });
+}
+
+function updateBars() {
+  var keys = ['a','b','c','d'];
+  var maxCount = 0;
+  keys.forEach(function(k) {
+    var n = particles.filter(function(p) { return p.key === k && p.alive; }).length;
+    if (n > maxCount) maxCount = n;
+  });
+  keys.forEach(function(k) {
+    var n = particles.filter(function(p) { return p.key === k && p.alive; }).length;
+    var el = document.getElementById('bar_' + k);
+    var cnt = document.getElementById('cnt_' + k);
+    if (el) el.style.width = (maxCount > 0 ? (n / maxCount) * 100 : 0) + '%';
+    if (cnt) cnt.textContent = n;
+  });
+}
+
+// ============================================================
+// GUESS
+// ============================================================
+function makeGuess(side) {
+  if (phase !== 'guess') return;
+  phase = 'result';
+  userGuess = side;
+
+  var correct = currentChange.correct;
+  var isCorrect;
+  if (correct === 'neutral') {
+    isCorrect = (side === 'right'); // we'll give partial credit, but show explanation
+  } else {
+    isCorrect = (side === correct);
+  }
+
+  if (isCorrect) {
+    score.correct++;
+    document.getElementById('btnLeft').className = 'guess-btn btn-left' + (side === 'left' ? ' btn-correct' : '');
+    document.getElementById('btnRight').className = 'guess-btn btn-right' + (side === 'right' ? ' btn-correct' : '');
+  } else {
+    score.wrong++;
+    document.getElementById('btnLeft').className = 'guess-btn btn-left' + (side === 'left' ? ' btn-wrong' : '');
+    document.getElementById('btnRight').className = 'guess-btn btn-right' + (side === 'right' ? ' btn-wrong' : '');
+  }
+
+  document.getElementById('sCorrect').textContent = score.correct;
+  document.getElementById('sWrong').textContent = score.wrong;
+
+  // Show simulation
+  document.getElementById('simCard').style.display = 'block';
+  resizeCanvas();
+  initCounts();
+  initParticles();
+  buildBars();
+  if (animId) cancelAnimationFrame(animId);
+  animLoop();
+
+  // Delay shift
+  setTimeout(function() {
+    animateShift(correct);
+    renderReaction(correct === 'neutral' ? null : correct);
+  }, 800);
+
+  // Show result
+  setTimeout(function() {
+    showResult(isCorrect, correct);
+  }, 400);
+}
+
+// ============================================================
+// RESULT
+// ============================================================
+function showResult(isCorrect, correct) {
+  var box = document.getElementById('resultBox');
+  var header = document.getElementById('resultHeader');
+  var body = document.getElementById('resultBody');
+
+  if (correct === 'neutral') {
+    box.className = 'result-box show partial';
+    box.style.background = 'rgba(251,191,36,0.08)';
+    box.style.borderColor = 'var(--yellow)';
+    header.innerHTML = '<span style="color:var(--yellow)">&#x2139; Besonderer Fall</span>';
+  } else if (isCorrect) {
+    box.className = 'result-box show correct';
+    header.innerHTML = '<span style="color:var(--green)">&#x2705; Richtig!</span>';
+  } else {
+    box.className = 'result-box show wrong';
+    var correctLabel = correct === 'right' ? 'Produktseite &rarr;' : '&larr; Eduktseite';
+    header.innerHTML = '<span style="color:var(--red)">&#x274C; Leider falsch &mdash; richtig w\u00e4re: <em>' + correctLabel + '</em></span>';
+  }
+
+  // Principle explanation
+  var ch = currentChange;
+  var principle = '';
+  if (ch.type === 'temp') {
+    principle = '<br><br><strong>Prinzip:</strong> Bei Temperatur\u00e4nderungen gilt: W\u00e4rmezufuhr beg\u00fcnstigt endotherme Richtung, Abk\u00fchlung beg\u00fcnstigt exotherme Richtung. <span class="formula">\u0394H = ' + (currentReaction.deltaH > 0 ? '+' : '') + currentReaction.deltaH + ' kJ/mol</span>';
+  } else if (ch.type === 'press') {
+    principle = '<br><br><strong>Prinzip:</strong> Druckerh\u00f6hung beg\u00fcnstigt die Seite mit weniger Gasmol (\u0394n = ' + currentReaction.deltaN + '). Bei \u0394n = 0 hat Druck keinen Einfluss. <span class="formula">pV = nRT</span>';
+  } else {
+    principle = '<br><br><strong>Prinzip:</strong> Konzentrations\u00e4nderungen: Erh\u00f6hung eines Edukts \u2192 Produktseite. Erh\u00f6hung eines Produkts \u2192 Eduktseite (Le-Chatelier-Prinzip). <span class="formula">K = [Produkte] / [Edukte]</span>';
+  }
+
+  body.innerHTML = ch.explain + principle;
+
+  document.getElementById('resultCard').style.display = 'block';
+  document.getElementById('nextBtn').className = 'next-btn show';
+}
+</script>
+</body>
+</html>
