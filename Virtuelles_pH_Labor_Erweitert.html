@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtuelles pH-Labor – Erweiterte Version</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:1100px;margin:auto;padding:20px}
+h1,h2{text-align:center}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.beaker{width:240px;height:280px;border:4px solid #444;border-top:none;border-radius:0 0 20px 20px;position:relative;overflow:hidden;margin:auto}
+.liquid{position:absolute;bottom:0;width:100%;height:80%;transition:background-color .3s}
+.meter{text-align:center;font-size:30px;font-weight:bold}
+.controls{text-align:center}
+button,select{padding:10px;margin:5px}
+.scale{height:30px;background:linear-gradient(to right,red,orange,yellow,green,blue,indigo,violet);border:1px solid #333}
+.card{border:1px solid #ccc;padding:15px;border-radius:10px}
+#feedback{font-weight:bold}
+.drop{position:absolute;width:10px;height:15px;background:#444;border-radius:50%;animation:fall .6s linear}
+@keyframes fall{
+from{top:-20px}to{top:220px}
+}
+</style>
+</head>
+<body>
+
+<h1>Virtuelles pH-Labor</h1>
+
+<div class="grid">
+
+<div class="card">
+<h2>Experiment</h2>
+
+<div>
+<label>Lösung wählen:</label>
+<select id="solution" onchange="changeSolution()">
+<option value="7">Destilliertes Wasser (pH 7)</option>
+<option value="2.5">Zitronensaft (pH 2.5)</option>
+<option value="2.8">Cola (pH 2.8)</option>
+<option value="8.2">Meerwasser (pH 8.2)</option>
+<option value="10.5">Seifenlösung (pH 10.5)</option>
+</select>
+</div>
+
+<div class="meter">pH: <span id="ph">7.0</span></div>
+
+<div class="beaker">
+<div id="liquid" class="liquid"></div>
+</div>
+
+<div class="controls">
+<button onclick="addAcid()">➖ Säure</button>
+<button onclick="addBase()">➕ Base</button>
+<button onclick="resetLab()">🔄 Reset</button>
+</div>
+
+<p><b>Universalindikator</b></p>
+<div class="scale"></div>
+<p>0 ← sauer | neutral | basisch → 14</p>
+</div>
+
+<div class="card">
+<h2>Quizmodus</h2>
+
+<p>Ordne den Stoff auf der pH-Skala ein:</p>
+
+<div id="question"></div>
+
+<select id="answer">
+<option>sauer</option>
+<option>neutral</option>
+<option>basisch</option>
+</select>
+
+<button onclick="checkAnswer()">Prüfen</button>
+
+<p id="feedback"></p>
+<p>Punkte: <span id="score">0</span></p>
+
+<button onclick="newQuestion()">Neue Frage</button>
+</div>
+
+</div>
+
+<script>
+let ph=7;
+let startPH=7;
+let score=0;
+
+const quiz=[
+{name:"Zitronensaft",type:"sauer"},
+{name:"Cola",type:"sauer"},
+{name:"Destilliertes Wasser",type:"neutral"},
+{name:"Meerwasser",type:"basisch"},
+{name:"Seifenlösung",type:"basisch"}
+];
+
+function phColor(ph){
+if(ph<3)return "red";
+if(ph<5)return "orange";
+if(ph<6.5)return "yellow";
+if(ph<7.5)return "green";
+if(ph<10)return "blue";
+if(ph<12)return "indigo";
+return "violet";
+}
+
+function updateDisplay(){
+document.getElementById("ph").textContent=ph.toFixed(2);
+document.getElementById("liquid").style.backgroundColor=phColor(ph);
+}
+
+function animateDrop(){
+const d=document.createElement("div");
+d.className="drop";
+d.style.left=(100+Math.random()*40)+"px";
+document.querySelector(".beaker").appendChild(d);
+setTimeout(()=>d.remove(),600);
+}
+
+function addAcid(){
+animateDrop();
+
+// vereinfachte logarithmische Annäherung
+let h=Math.pow(10,-ph);
+h*=3;
+ph=-Math.log10(h);
+if(ph<0)ph=0;
+
+updateDisplay();
+}
+
+function addBase(){
+animateDrop();
+
+let h=Math.pow(10,-ph);
+h/=3;
+ph=-Math.log10(h);
+if(ph>14)ph=14;
+
+updateDisplay();
+}
+
+function resetLab(){
+ph=startPH;
+updateDisplay();
+}
+
+function changeSolution(){
+startPH=parseFloat(document.getElementById("solution").value);
+ph=startPH;
+updateDisplay();
+}
+
+let current=null;
+
+function newQuestion(){
+current=quiz[Math.floor(Math.random()*quiz.length)];
+document.getElementById("question").innerHTML=
+"Wie würdest du <b>"+current.name+"</b> einordnen?";
+document.getElementById("feedback").innerHTML="";
+}
+
+function checkAnswer(){
+let ans=document.getElementById("answer").value;
+
+if(ans===current.type){
+score++;
+document.getElementById("feedback").innerHTML="✅ Richtig!";
+}else{
+document.getElementById("feedback").innerHTML=
+"❌ Falsch. Richtige Antwort: "+current.type;
+}
+document.getElementById("score").innerHTML=score;
+}
+
+changeSolution();
+newQuestion();
+</script>
+
+</body>
+</html>
