@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtuelle Dampfmaschine</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --panel: #181c27;
+    --panel2: #1f2336;
+    --border: #2e3450;
+    --orange: #f97316;
+    --orange-dim: #7c3a0e;
+    --blue: #38bdf8;
+    --blue-dim: #0c3a52;
+    --green: #4ade80;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* HEADER */
+  .site-header {
+    background: linear-gradient(135deg, #0f1117 0%, #1a1f35 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 24px 32px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .site-header .icon { font-size: 2.4rem; }
+  .site-header h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .site-header h1 span { color: var(--orange); }
+  .site-header p { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+
+  /* LAYOUT */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 20px 0;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto auto;
+    gap: 20px;
+  }
+
+  /* SIMULATION PANEL */
+  .sim-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    grid-row: span 2;
+  }
+
+  .sim-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+
+  /* ENGINE SVG */
+  #engineCanvas {
+    width: 100%;
+    height: 300px;
+    display: block;
+    border-radius: 10px;
+    background: #0b0d15;
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .ctrl-btn {
+    padding: 13px 10px;
+    border-radius: 10px;
+    border: 1.5px solid;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .ctrl-btn:active { transform: scale(0.97); }
+
+  .btn-heat   { background: rgba(249,115,22,0.12); border-color: var(--orange);   color: var(--orange); }
+  .btn-cool   { background: rgba(56,189,248,0.10); border-color: var(--blue);     color: var(--blue); }
+  .btn-comp   { background: rgba(251,191,36,0.10); border-color: var(--yellow);   color: var(--yellow); }
+  .btn-expand { background: rgba(74,222,128,0.10); border-color: var(--green);    color: var(--green); }
+
+  .btn-heat:hover   { background: rgba(249,115,22,0.25); }
+  .btn-cool:hover   { background: rgba(56,189,248,0.22); }
+  .btn-comp:hover   { background: rgba(251,191,36,0.22); }
+  .btn-expand:hover { background: rgba(74,222,128,0.22); }
+
+  .btn-icon { font-size: 1.1rem; }
+
+  /* RESET */
+  .btn-reset {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-reset:hover { background: var(--panel2); color: var(--text); }
+
+  /* PROCESS LOG */
+  .log-box {
+    margin-top: 16px;
+    background: #0b0d15;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    color: var(--muted);
+    height: 90px;
+    overflow-y: auto;
+    line-height: 1.7;
+  }
+  .log-box .log-entry { color: var(--text); }
+  .log-box .log-entry span { color: var(--orange); }
+
+  /* RIGHT: GAUGES */
+  .gauges-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .gauge {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .gauge-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .gauge-label .unit { font-weight: 400; font-size: 0.68rem; }
+  .gauge-value {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .gauge-bar-bg {
+    height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .gauge-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease, background 0.4s;
+  }
+
+  /* DIAGRAMS */
+  .diagrams-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+  }
+
+  .diagram-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .diag-tab {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .diag-tab.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+  .diag-tab:hover:not(.active) { background: var(--panel2); color: var(--text); }
+
+  .diagram-canvas-wrap { position: relative; }
+  canvas.diag-canvas {
+    width: 100%;
+    border-radius: 8px;
+    background: #0b0d15;
+    border: 1px solid var(--border);
+    display: block;
+  }
+  .diag-hidden { display: none; }
+
+  /* EXPLAINER */
+  .explainer {
+    margin-top: 20px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    grid-column: span 2;
+  }
+  .explainer h2 {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 16px;
+  }
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .concept-card {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .concept-card h3 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .concept-card p {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+  .concept-card .formula {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--orange);
+    margin-top: 8px;
+    padding: 5px 8px;
+    background: rgba(249,115,22,0.08);
+    border-radius: 5px;
+    display: inline-block;
+  }
+
+
+  /* MATERIAL SELECTOR */
+  .material-section { margin-bottom: 16px; }
+  .material-label {
+    font-size: 0.7rem; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: block;
+  }
+  .material-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  .mat-btn {
+    padding: 8px 6px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: var(--panel2); color: var(--text); font-family: var(--sans);
+    font-size: 0.75rem; font-weight: 600; cursor: pointer; text-align: center;
+    transition: all 0.15s; line-height: 1.3;
+  }
+  .mat-btn .mat-icon { font-size: 1.1rem; display: block; margin-bottom: 3px; }
+  .mat-btn .mat-cp  { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); display: block; }
+  .mat-btn:hover { border-color: #38bdf8; background: rgba(56,189,248,0.08); }
+  .mat-btn.active { border-color: #38bdf8; background: rgba(56,189,248,0.15); color: #38bdf8; }
+  .mat-btn.active .mat-cp { color: #38bdf8; }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+    .sim-panel { grid-row: auto; }
+    .concept-grid { grid-template-columns: 1fr; }
+    .explainer { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="icon">&#x2699;&#xFE0F;</div>
+  <div>
+    <h1>Virtuelle <span>Dampfmaschine</span></h1>
+    <p>Interaktives Thermodynamik-Modell &mdash; Enthalpie &middot; Entropie &middot; W&auml;rmekapazit&auml;t</p>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- LEFT: ENGINE + CONTROLS -->
+  <div class="sim-panel">
+    <div class="sim-title">&#x25CF; Simulation &mdash; Kolbenmodell</div>
+
+    <svg id="engineCanvas" viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background grid -->
+      <defs>
+        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1a1f2e" stroke-width="0.5"/>
+        </pattern>
+        <linearGradient id="gasGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop id="gasStop1" offset="0%" stop-color="#1e3a5f"/>
+          <stop id="gasStop2" offset="100%" stop-color="#0b1929"/>
+        </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <rect width="600" height="280" fill="url(#grid)"/>
+
+      <!-- Cylinder walls -->
+      <rect x="80" y="40" width="320" height="200" fill="none" stroke="#2e3450" stroke-width="2" rx="4"/>
+
+      <!-- Gas chamber (dynamic) -->
+      <rect id="gasChamber" x="82" y="42" width="200" height="196" fill="url(#gasGrad)" opacity="0.9"/>
+
+      <!-- Piston -->
+      <rect id="piston" x="270" y="42" width="30" height="196" fill="#374151" stroke="#4b5563" stroke-width="1.5" rx="3"/>
+      <rect id="pistonHighlight" x="274" y="50" width="6" height="180" fill="#6b7280" rx="2" opacity="0.5"/>
+
+      <!-- Piston rod -->
+      <rect id="pistonRod" x="300" y="120" width="120" height="12" fill="#374151" rx="3"/>
+      <circle id="pistonJoint" cx="302" cy="126" r="7" fill="#4b5563" stroke="#6b7280" stroke-width="1"/>
+
+      <!-- Cylinder end caps -->
+      <rect x="60" y="40" width="22" height="200" fill="#1f2336" stroke="#2e3450" stroke-width="2" rx="3"/>
+      <rect x="398" y="40" width="22" height="200" fill="#1f2336" stroke="#2e3450" stroke-width="2" rx="3"/>
+
+      <!-- Heat source (bottom) -->
+      <g id="heatSource" opacity="0.0">
+        <rect x="82" y="220" width="200" height="18" fill="#f97316" opacity="0.3" rx="2"/>
+        <text x="182" y="233" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="10" fill="#f97316">&#x1F525; HEIZUNG</text>
+      </g>
+
+      <!-- Cool source (top) -->
+      <g id="coolSource" opacity="0.0">
+        <rect x="82" y="42" width="200" height="18" fill="#38bdf8" opacity="0.3" rx="2"/>
+        <text x="182" y="55" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="10" fill="#38bdf8">&#x2745; K&#xDC;HLUNG</text>
+      </g>
+
+      <!-- Particles -->
+      <g id="particles"></g>
+
+      <!-- Arrows for compression/expansion -->
+      <g id="arrowComp" opacity="0">
+        <text x="460" y="125" font-size="28" fill="#fbbf24" text-anchor="middle">&#x21D0;</text>
+        <text x="460" y="150" font-family="Share Tech Mono,monospace" font-size="9" fill="#fbbf24" text-anchor="middle">KOMP.</text>
+      </g>
+      <g id="arrowExpand" opacity="0">
+        <text x="460" y="125" font-size="28" fill="#4ade80" text-anchor="middle">&#x21D2;</text>
+        <text x="460" y="150" font-family="Share Tech Mono,monospace" font-size="9" fill="#4ade80" text-anchor="middle">EXPAN.</text>
+      </g>
+
+      <!-- Labels -->
+      <text x="182" y="262" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="9" fill="#475569">GAS / DAMPF</text>
+      <text x="540" y="130" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="9" fill="#475569">KOLBEN</text>
+      <text x="540" y="143" text-anchor="middle" font-family="Share Tech Mono,monospace" font-size="9" fill="#475569">STANGE</text>
+
+      <!-- Temperature glow overlay -->
+      <rect id="tempGlow" x="82" y="42" width="200" height="196" fill="#f97316" opacity="0" rx="2"/>
+    </svg>
+
+    <div class="controls">
+      <button class="ctrl-btn btn-heat" onclick="doAction('heat')">
+        <span class="btn-icon">&#x1F525;</span> Heizen
+      </button>
+      <button class="ctrl-btn btn-cool" onclick="doAction('cool')">
+        <span class="btn-icon">&#x2744;</span> K&uuml;hlen
+      </button>
+      <button class="ctrl-btn btn-comp" onclick="doAction('compress')">
+        <span class="btn-icon">&#x25BC;</span> Komprimieren
+      </button>
+      <button class="ctrl-btn btn-expand" onclick="doAction('expand')">
+        <span class="btn-icon">&#x25B2;</span> Expandieren
+      </button>
+    </div>
+    <div class="material-section">
+      <span class="material-label">&#x1F9EA; Stoff w&auml;hlen &mdash; Einfluss auf c<sub>p</sub></span>
+      <div class="material-grid" id="materialGrid">
+        <button class="mat-btn active" onclick="selectMaterial('luft')">
+          <span class="mat-icon">&#x1F32C;</span>Luft<span class="mat-cp">29.1 J/mol&middot;K</span>
+        </button>
+        <button class="mat-btn" onclick="selectMaterial('wasser_gas')">
+          <span class="mat-icon">&#x1F4A8;</span>Wasserdampf<span class="mat-cp">37.5 J/mol&middot;K</span>
+        </button>
+        <button class="mat-btn" onclick="selectMaterial('co2')">
+          <span class="mat-icon">&#x1F32B;</span>CO&#x2082;<span class="mat-cp">37.1 J/mol&middot;K</span>
+        </button>
+        <button class="mat-btn" onclick="selectMaterial('helium')">
+          <span class="mat-icon">&#x1F388;</span>Helium<span class="mat-cp">20.8 J/mol&middot;K</span>
+        </button>
+        <button class="mat-btn" onclick="selectMaterial('wasser')">
+          <span class="mat-icon">&#x1F4A7;</span>Wasser (fl.)<span class="mat-cp">75.3 J/mol&middot;K</span>
+        </button>
+        <button class="mat-btn" onclick="selectMaterial('ethanol')">
+          <span class="mat-icon">&#x1F377;</span>Ethanol<span class="mat-cp">112 J/mol&middot;K</span>
+        </button>
+        <button class="mat-btn" onclick="selectMaterial('eisen')">
+          <span class="mat-icon">&#x26AA;</span>Eisen<span class="mat-cp">25.1 J/mol&middot;K</span>
+        </button>
+        <button class="mat-btn" onclick="selectMaterial('kupfer')">
+          <span class="mat-icon">&#x1F7E0;</span>Kupfer<span class="mat-cp">24.5 J/mol&middot;K</span>
+        </button>
+        <button class="mat-btn" onclick="selectMaterial('aluminium')">
+          <span class="mat-icon">&#x26AA;</span>Aluminium<span class="mat-cp">24.2 J/mol&middot;K</span>
+        </button>
+        <button class="mat-btn" onclick="selectMaterial('blei')">
+          <span class="mat-icon">&#x26AB;</span>Blei<span class="mat-cp">26.8 J/mol&middot;K</span>
+        </button>
+        <button class="mat-btn" onclick="selectMaterial('gold')">
+          <span class="mat-icon">&#x1F7E1;</span>Gold<span class="mat-cp">25.4 J/mol&middot;K</span>
+        </button>
+      </div>
+    </div>
+    <button class="btn-reset" onclick="resetSim()">&#x21BA; Simulation zur&uuml;cksetzen</button>
+
+    <div class="log-box" id="logBox">
+      <div style="color:#475569">&#x25B6; Simulation bereit. W&auml;hle eine Aktion...</div>
+    </div>
+  </div>
+
+  <!-- RIGHT: GAUGES -->
+  <div class="gauges-panel">
+    <div class="sim-title">&#x25CF; Zustandsgr&ouml;&szlig;en</div>
+
+    <div class="gauge">
+      <div class="gauge-label">Temperatur <span class="unit">K</span></div>
+      <div class="gauge-value" id="gT" style="color:#f97316">300 K</div>
+      <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="barT" style="width:30%;background:#f97316"></div></div>
+    </div>
+
+    <div class="gauge">
+      <div class="gauge-label">Druck <span class="unit">bar</span></div>
+      <div class="gauge-value" id="gP" style="color:#fbbf24">1.00 bar</div>
+      <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="barP" style="width:20%;background:#fbbf24"></div></div>
+    </div>
+
+    <div class="gauge">
+      <div class="gauge-label">Volumen <span class="unit">L</span></div>
+      <div class="gauge-value" id="gV" style="color:#4ade80">10.0 L</div>
+      <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="barV" style="width:50%;background:#4ade80"></div></div>
+    </div>
+
+    <div class="gauge">
+      <div class="gauge-label">Entropie &Delta;S <span class="unit">J/K</span></div>
+      <div class="gauge-value" id="gS" style="color:#a78bfa">0.0 J/K</div>
+      <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="barS" style="width:0%;background:#a78bfa"></div></div>
+    </div>
+
+    <div class="gauge">
+      <div class="gauge-label">Enthalpie &Delta;H <span class="unit">kJ</span></div>
+      <div class="gauge-value" id="gH" style="color:#f472b6">0.0 kJ</div>
+      <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="barH" style="width:0%;background:#f472b6"></div></div>
+    </div>
+
+    <div class="gauge">
+      <div class="gauge-label">W&auml;rmekapazit&auml;t c<sub>p</sub> <span class="unit">J/(mol&#xB7;K)</span></div>
+      <div class="gauge-value" id="gCp" style="color:#38bdf8">29.1</div>
+      <div class="gauge-bar-bg"><div class="gauge-bar-fill" id="barCp" style="width:40%;background:#38bdf8"></div></div>
+    </div>
+  </div>
+
+  <!-- DIAGRAMS -->
+  <div class="diagrams-panel">
+    <div class="sim-title">&#x25CF; Zustandsdiagramme</div>
+    <div class="diagram-tabs">
+      <button class="diag-tab active" onclick="switchDiag('pv')">p-V-Diagramm</button>
+      <button class="diag-tab" onclick="switchDiag('ts')">T-s-Diagramm</button>
+    </div>
+    <div class="diagram-canvas-wrap">
+      <canvas id="pvCanvas" class="diag-canvas" width="680" height="220"></canvas>
+      <canvas id="tsCanvas" class="diag-canvas diag-hidden" width="680" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- EXPLAINER -->
+  <div class="explainer" style="grid-column:1/-1">
+    <h2>&#x1F4DA; Thermodynamische Konzepte</h2>
+    <div class="concept-grid">
+      <div class="concept-card">
+        <h3><span style="color:#f472b6">&#x25CF;</span> Enthalpie H</h3>
+        <p>Die Enthalpie beschreibt den Gesamtw&auml;rmeinhalt eines Systems bei konstantem Druck. Bei Zufuhr von W&auml;rme steigt H &mdash; das System kann mehr Arbeit leisten.</p>
+        <div class="formula">H = U + p &middot; V</div>
+      </div>
+      <div class="concept-card">
+        <h3><span style="color:#a78bfa">&#x25CF;</span> Entropie S</h3>
+        <p>Entropie ist ein Ma&szlig; f&uuml;r die Unordnung. Irreversible Prozesse (z.B. Reibung, schnelle Kompression) erh&ouml;hen immer die Entropie. Reversible Prozesse &auml;ndern sie minimal.</p>
+        <div class="formula">dS = dQ<sub>rev</sub> / T</div>
+      </div>
+      <div class="concept-card">
+        <h3><span style="color:#38bdf8">&#x25CF;</span> W&auml;rmekapazit&auml;t c</h3>
+        <p>Die W&auml;rmekapazit&auml;t gibt an, wie viel Energie n&ouml;tig ist, um 1 mol eines Stoffes um 1 K zu erw&auml;rmen. F&uuml;r ideale zweiatomige Gase gilt c<sub>p</sub> &asymp; 29 J/(mol&middot;K).</p>
+        <div class="formula">Q = n &middot; c<sub>p</sub> &middot; &Delta;T</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────
+var state = {
+  T: 300,    // Kelvin
+  p: 1.0,    // bar
+  V: 10.0,   // Liter
+  S: 0.0,    // J/K (delta)
+  H: 0.0,    // kJ (delta)
+  cp: 29.1,  // J/(mol*K) ideal diatomic gas
+  n: 0.4,    // mol (fixed)
+  R: 0.08314 // L*bar/(mol*K)
+};
+
+var pvHistory = [];
+var tsHistory = [];
+var activeDiag = 'pv';
+var animFrame = null;
+
+// ── PARTICLES ──────────────────────────────────────────────────
+var particles = [];
+function initParticles() {
+  particles = [];
+  var g = document.getElementById('particles');
+  g.innerHTML = '';
+  var count = 18;
+  for (var i = 0; i < count; i++) {
+    var px = 90 + Math.random() * 170;
+    var py = 50 + Math.random() * 180;
+    var vx = (Math.random() - 0.5) * 1.5;
+    var vy = (Math.random() - 0.5) * 1.5;
+    var el = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    el.setAttribute('r', '3');
+    el.setAttribute('cx', px);
+    el.setAttribute('cy', py);
+    el.setAttribute('fill', '#38bdf8');
+    el.setAttribute('opacity', '0.7');
+    g.appendChild(el);
+    particles.push({ x: px, y: py, vx: vx, vy: vy, el: el });
+  }
+}
+
+function getMaxX() {
+  var pistonX = getPistonX();
+  return pistonX;
+}
+
+function getPistonX() {
+  // Volume 5..20 L maps to piston x 160..282
+  var frac = (state.V - 5) / 15;
+  return 160 + frac * 122;
+}
+
+function animateParticles() {
+  var speed = 0.6 + (state.T - 200) / 600;
+  var maxX = getMaxX();
+  for (var i = 0; i < particles.length; i++) {
+    var p = particles[i];
+    p.x += p.vx * speed;
+    p.y += p.vy * speed;
+    if (p.x < 85) { p.x = 85; p.vx = Math.abs(p.vx); }
+    if (p.x > maxX - 5) { p.x = maxX - 5; p.vx = -Math.abs(p.vx); }
+    if (p.y < 48) { p.y = 48; p.vy = Math.abs(p.vy); }
+    if (p.y > 232) { p.y = 232; p.vy = -Math.abs(p.vy); }
+    p.el.setAttribute('cx', p.x);
+    p.el.setAttribute('cy', p.y);
+    // Color by temperature
+    var t01 = Math.min(1, Math.max(0, (state.T - 200) / 600));
+    var r = Math.round(56 + t01 * 199);
+    var g2 = Math.round(189 - t01 * 100);
+    var b = Math.round(248 - t01 * 130);
+    p.el.setAttribute('fill', 'rgb(' + r + ',' + g2 + ',' + b + ')');
+  }
+  animFrame = requestAnimationFrame(animateParticles);
+}
+
+// ── UPDATE SVG ──────────────────────────────────────────────────
+function updateSVG() {
+  var px = getPistonX();
+  var chamberW = px - 82;
+  document.getElementById('gasChamber').setAttribute('width', chamberW);
+  document.getElementById('piston').setAttribute('x', px);
+  document.getElementById('pistonHighlight').setAttribute('x', px + 4);
+  document.getElementById('pistonRod').setAttribute('x', px + 30);
+  document.getElementById('pistonRod').setAttribute('width', Math.max(10, 400 - px - 30));
+  document.getElementById('pistonJoint').setAttribute('cx', px + 32);
+
+  // Gas color by temperature
+  var t01 = Math.min(1, Math.max(0, (state.T - 200) / 600));
+  document.getElementById('gasStop1').setAttribute('stop-color',
+    'rgb(' + Math.round(30 + t01*180) + ',' + Math.round(58 - t01*30) + ',' + Math.round(95 - t01*60) + ')');
+  document.getElementById('tempGlow').setAttribute('opacity', t01 * 0.12);
+}
+
+// ── GAUGES ──────────────────────────────────────────────────────
+function updateGauges() {
+  document.getElementById('gT').textContent = Math.round(state.T) + ' K';
+  document.getElementById('gP').textContent = state.p.toFixed(2) + ' bar';
+  document.getElementById('gV').textContent = state.V.toFixed(1) + ' L';
+  document.getElementById('gS').textContent = state.S.toFixed(1) + ' J/K';
+  document.getElementById('gH').textContent = state.H.toFixed(2) + ' kJ';
+  document.getElementById('gCp').textContent = state.cp.toFixed(1);
+
+  document.getElementById('barT').style.width = Math.min(100, Math.max(0, (state.T - 200) / 8)) + '%';
+  document.getElementById('barP').style.width = Math.min(100, state.p / 20 * 100) + '%';
+  document.getElementById('barV').style.width = Math.min(100, (state.V / 20) * 100) + '%';
+  document.getElementById('barS').style.width = Math.min(100, Math.abs(state.S) / 5 * 100) + '%';
+  document.getElementById('barH').style.width = Math.min(100, (Math.abs(state.H) / 50) * 100) + '%';
+}
+
+// ── DIAGRAMS ──────────────────────────────────────────────────────
+function drawDiagram() {
+  if (activeDiag === 'pv') drawPV();
+  else drawTS();
+}
+
+function drawPV() {
+  var canvas = document.getElementById('pvCanvas');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = '#0b0d15';
+  ctx.fillRect(0, 0, W, H);
+
+  var pad = { l: 55, r: 20, t: 20, b: 40 };
+  var cW = W - pad.l - pad.r;
+  var cH = H - pad.t - pad.b;
+
+  // Ranges
+  var Vmin = 3, Vmax = 22;
+  var Pmin = 0, Pmax = 20;
+
+  function toX(v) { return pad.l + (v - Vmin) / (Vmax - Vmin) * cW; }
+  function toY(p) { return pad.t + cH - (p - Pmin) / (Pmax - Pmin) * cH; }
+
+  // Grid
+  ctx.strokeStyle = '#1a1f2e';
+  ctx.lineWidth = 1;
+  for (var v = 4; v <= 20; v += 4) {
+    ctx.beginPath(); ctx.moveTo(toX(v), pad.t); ctx.lineTo(toX(v), pad.t + cH); ctx.stroke();
+  }
+  for (var p = 0; p <= 20; p += 5) {
+    ctx.beginPath(); ctx.moveTo(pad.l, toY(p)); ctx.lineTo(pad.l + cW, toY(p)); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = '#2e3450'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + cH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t + cH); ctx.lineTo(pad.l + cW, pad.t + cH); ctx.stroke();
+
+  // Labels
+  ctx.fillStyle = '#475569'; ctx.font = '10px Share Tech Mono,monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Volumen V (L)', pad.l + cW / 2, H - 6);
+  for (var v2 = 4; v2 <= 20; v2 += 4) {
+    ctx.fillText(v2, toX(v2), pad.t + cH + 14);
+  }
+  ctx.textAlign = 'right';
+  ctx.fillText('p (bar)', pad.l - 6, pad.t + 8);
+  for (var p2 = 0; p2 <= 20; p2 += 5) {
+    ctx.fillText(p2, pad.l - 6, toY(p2) + 4);
+  }
+
+  // Path
+  if (pvHistory.length > 1) {
+    ctx.strokeStyle = '#f97316'; ctx.lineWidth = 1.5;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(toX(pvHistory[0].V), toY(pvHistory[0].p));
+    for (var i = 1; i < pvHistory.length; i++) {
+      ctx.lineTo(toX(pvHistory[i].V), toY(pvHistory[i].p));
+    }
+    ctx.stroke();
+  }
+
+  // Current point
+  if (pvHistory.length > 0) {
+    var cur = pvHistory[pvHistory.length - 1];
+    ctx.fillStyle = '#f97316';
+    ctx.shadowColor = '#f97316'; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(toX(cur.V), toY(cur.p), 5, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+}
+
+function drawTS() {
+  var canvas = document.getElementById('tsCanvas');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#0b0d15'; ctx.fillRect(0, 0, W, H);
+
+  var pad = { l: 55, r: 20, t: 20, b: 40 };
+  var cW = W - pad.l - pad.r;
+  var cH = H - pad.t - pad.b;
+
+  var Smin = -2, Smax = 8;
+  var Tmin = 150, Tmax = 1100;
+
+  function toX(s) { return pad.l + (s - Smin) / (Smax - Smin) * cW; }
+  function toY(t) { return pad.t + cH - (t - Tmin) / (Tmax - Tmin) * cH; }
+
+  ctx.strokeStyle = '#1a1f2e'; ctx.lineWidth = 1;
+  for (var s = -2; s <= 8; s += 2) {
+    ctx.beginPath(); ctx.moveTo(toX(s), pad.t); ctx.lineTo(toX(s), pad.t + cH); ctx.stroke();
+  }
+  for (var t = 200; t <= 1000; t += 200) {
+    ctx.beginPath(); ctx.moveTo(pad.l, toY(t)); ctx.lineTo(pad.l + cW, toY(t)); ctx.stroke();
+  }
+
+  ctx.strokeStyle = '#2e3450'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + cH); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad.l, pad.t + cH); ctx.lineTo(pad.l + cW, pad.t + cH); ctx.stroke();
+
+  ctx.fillStyle = '#475569'; ctx.font = '10px Share Tech Mono,monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('Entropie \u0394S (J/K)', pad.l + cW / 2, H - 6);
+  for (var s2 = -2; s2 <= 8; s2 += 2) {
+    ctx.fillText(s2, toX(s2), pad.t + cH + 14);
+  }
+  ctx.textAlign = 'right';
+  ctx.fillText('T (K)', pad.l - 6, pad.t + 8);
+  for (var t2 = 200; t2 <= 1000; t2 += 200) {
+    ctx.fillText(t2, pad.l - 6, toY(t2) + 4);
+  }
+
+  if (tsHistory.length > 1) {
+    ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(toX(tsHistory[0].S), toY(tsHistory[0].T));
+    for (var i2 = 1; i2 < tsHistory.length; i2++) {
+      ctx.lineTo(toX(tsHistory[i2].S), toY(tsHistory[i2].T));
+    }
+    ctx.stroke();
+  }
+
+  if (tsHistory.length > 0) {
+    var cur2 = tsHistory[tsHistory.length - 1];
+    ctx.fillStyle = '#a78bfa';
+    ctx.shadowColor = '#a78bfa'; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(toX(cur2.S), toY(cur2.T), 5, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+}
+
+// ── LOG ──────────────────────────────────────────────────────────
+function log(text, color) {
+  var box = document.getElementById('logBox');
+  var div = document.createElement('div');
+  div.className = 'log-entry';
+  div.innerHTML = '<span style="color:' + (color||'#f97316') + '">&rsaquo;</span> ' + text;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+  while (box.children.length > 12) box.removeChild(box.firstChild);
+}
+
+// ── FLASH EFFECTS ────────────────────────────────────────────────
+function flashEffect(id, duration) {
+  var el = document.getElementById(id);
+  el.style.opacity = '1';
+  setTimeout(function() { el.style.opacity = '0'; }, duration || 1500);
+}
+
+// ── ACTIONS ──────────────────────────────────────────────────────
+function doAction(action) {
+  var dT = 0, dV = 0, dS = 0, dH = 0;
+  var logMsg = '';
+  var logColor = '#f97316';
+
+  if (action === 'heat') {
+    dT = 60 + Math.random() * 20;
+    dH = state.n * state.cp * dT / 1000;
+    dS = state.n * state.cp * Math.log((state.T + dT) / state.T);
+    // Isobaric: V increases
+    dV = state.V * (dT / state.T);
+    logMsg = 'W&auml;rmezufuhr: +' + Math.round(dT) + ' K | &Delta;H = +' + dH.toFixed(2) + ' kJ';
+    logColor = '#f97316';
+    flashEffect('heatSource', 1200);
+  } else if (action === 'cool') {
+    dT = -(40 + Math.random() * 20);
+    if (state.T + dT < 100) dT = 100 - state.T;
+    dH = state.n * state.cp * dT / 1000;
+    dS = state.n * state.cp * Math.log((state.T + dT) / state.T);
+    dV = state.V * (dT / state.T);
+    logMsg = 'K&uuml;hlung: ' + Math.round(dT) + ' K | &Delta;H = ' + dH.toFixed(2) + ' kJ';
+    logColor = '#38bdf8';
+    flashEffect('coolSource', 1200);
+  } else if (action === 'compress') {
+    dV = -(2.5 + Math.random());
+    if (state.V + dV < 4) dV = 4 - state.V;
+    // Adiabatic approx: T rises, p rises
+    var ratio = state.V / (state.V + dV);
+    var gamma = 1.4;
+    dT = state.T * (Math.pow(ratio, gamma - 1) - 1);
+    // Irreversible: extra entropy
+    dS = 0.8 + Math.random() * 0.5;
+    dH = state.n * state.cp * dT / 1000;
+    logMsg = 'Kompression: V = ' + (state.V + dV).toFixed(1) + ' L | Entropie &uarr; ' + dS.toFixed(2) + ' J/K (irreversibel)';
+    logColor = '#fbbf24';
+    document.getElementById('arrowComp').style.opacity = '1';
+    setTimeout(function() { document.getElementById('arrowComp').style.opacity = '0'; }, 1000);
+  } else if (action === 'expand') {
+    dV = 2 + Math.random();
+    if (state.V + dV > 20) dV = 20 - state.V;
+    var ratio2 = state.V / (state.V + dV);
+    dT = state.T * (Math.pow(ratio2, 0.4) - 1);
+    dS = 0.4 + Math.random() * 0.3;
+    dH = state.n * state.cp * dT / 1000;
+    logMsg = 'Expansion: V = ' + (state.V + dV).toFixed(1) + ' L | W = ' + Math.abs(dH).toFixed(2) + ' kJ Arbeit geleistet';
+    logColor = '#4ade80';
+    document.getElementById('arrowExpand').style.opacity = '1';
+    setTimeout(function() { document.getElementById('arrowExpand').style.opacity = '0'; }, 1000);
+  }
+
+  state.T = Math.max(100, state.T + dT);
+  state.V = Math.min(20, Math.max(4, state.V + dV));
+  state.p = (state.n * state.R * state.T) / state.V;
+  state.S += dS;
+  state.H += dH;
+
+  pvHistory.push({ V: state.V, p: state.p });
+  tsHistory.push({ S: state.S, T: state.T });
+  if (pvHistory.length > 80) pvHistory.shift();
+  if (tsHistory.length > 80) tsHistory.shift();
+
+  updateGauges();
+  updateSVG();
+  drawDiagram();
+  log(logMsg, logColor);
+}
+
+// ── RESET ────────────────────────────────────────────────────────
+function resetSim() {
+  state.T = 300; state.p = 1.0; state.V = 10.0;
+  state.S = 0.0; state.H = 0.0;
+  pvHistory = [{ V: 10.0, p: 1.0 }];
+  tsHistory = [{ S: 0.0, T: 300 }];
+  updateGauges();
+  updateSVG();
+  drawDiagram();
+  var box = document.getElementById('logBox');
+  box.innerHTML = '<div style="color:#475569">&#x25B6; Simulation zur&uuml;ckgesetzt.</div>';
+}
+
+// ── TAB SWITCH ───────────────────────────────────────────────────
+function switchDiag(id) {
+  activeDiag = id;
+  document.querySelectorAll('.diag-tab').forEach(function(b, i) {
+    var ids = ['pv', 'ts'];
+    b.classList.toggle('active', ids[i] === id);
+  });
+  document.getElementById('pvCanvas').classList.toggle('diag-hidden', id !== 'pv');
+  document.getElementById('tsCanvas').classList.toggle('diag-hidden', id !== 'ts');
+  drawDiagram();
+}
+
+
+// -- MATERIALS -----------------------------------------------
+var MATERIALS = {
+  luft:       { name: 'Luft',         cp: 29.1,  icon: '&#x1F32C;', desc: 'Ideales zweiatomiges Gas (N₂, O₂). Geringe Wärmekapazität.' },
+  wasser_gas: { name: 'Wasserdampf',  cp: 37.5,  icon: '&#x1F4A8;', desc: 'Dreiatomiges Molekül – höhere cₚ durch Rotations- & Schwingungsfreiheitsgrade.' },
+  co2:        { name: 'CO₂',     cp: 37.1,  icon: '&#x1F32B;', desc: 'Lineares dreiatomiges Molekül. Ähnlich wie Wasserdampf, aber weniger Schwingungsmoden.' },
+  helium:     { name: 'Helium',       cp: 20.8,  icon: '&#x1F388;', desc: 'Einatomiges Edelgas. Nur 3 Translationsfreiheitsgrade → sehr geringe cₚ.' },
+  wasser:     { name: 'Wasser (fl.)', cp: 75.3,  icon: '&#x1F4A7;', desc: 'Flüssiges Wasser hat eine sehr hohe Wärmekapazität durch H-Brückenbindungen.' },
+  ethanol:    { name: 'Ethanol',      cp: 112.0, icon: '&#x1F377;', desc: 'Großes organisches Molekül → viele Schwingungsmoden → hohe cₚ.' },
+  eisen:      { name: 'Eisen',        cp: 25.1,  icon: '&#x26AA;',  desc: 'Metall: Dulong-Petit-Regel → cₚ ≈ 25 J/(mol·K) für alle Metalle.' },
+  kupfer:     { name: 'Kupfer',       cp: 24.5,  icon: '&#x1F7E0;', desc: 'Typisches Metall – Dulong-Petit. Gute Wärmeleitfähigkeit.' },
+  aluminium:  { name: 'Aluminium',    cp: 24.2,  icon: '&#x26AA;',  desc: 'Leichtes Metall mit ähnlicher molarer Wärmekapazität wie Eisen und Kupfer.' },
+  blei:       { name: 'Blei',         cp: 26.8,  icon: '&#x26AB;',  desc: 'Schweres Metall – trotz großer Atommasse: molare cₚ nach Dulong-Petit ≈ 25 J/(mol·K).' },
+  gold:       { name: 'Gold',         cp: 25.4,  icon: '&#x1F7E1;', desc: 'Edelmetall – bestätigt Dulong-Petit-Regel sehr präzise.' },
+};
+
+var currentMaterial = 'luft';
+
+function selectMaterial(key) {
+  if (!MATERIALS[key]) return;
+  currentMaterial = key;
+  var mat = MATERIALS[key];
+  state.cp = mat.cp;
+
+  // Update button styles
+  var btns = document.querySelectorAll('.mat-btn');
+  btns.forEach(function(b) { b.classList.remove('active'); });
+  event.currentTarget.classList.add('active');
+
+  // Update cp gauge
+  document.getElementById('gCp').textContent = mat.cp.toFixed(1);
+  document.getElementById('barCp').style.width = Math.min(100, (mat.cp / 120) * 100) + '%';
+
+  // Show info in log
+  log(mat.icon + ' ' + mat.name + ': cₚ = ' + mat.cp + ' J/(mol·K) — ' + mat.desc, '#38bdf8');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+pvHistory = [{ V: state.V, p: state.p }];
+tsHistory = [{ S: state.S, T: state.T }];
+initParticles();
+animateParticles();
+updateGauges();
+updateSVG();
+drawDiagram();
+</script>
+
+</body>
+</html>
