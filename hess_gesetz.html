@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Satz von Hess – Interaktive Übung</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d2e;
+    --surface2: #222540;
+    --border: #2e3255;
+    --accent: #6c8bef;
+    --accent2: #a78bfa;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+  }
+
+  header p {
+    color: var(--muted);
+    margin-top: 6px;
+    font-size: 0.95rem;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .target-eq {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    padding: 14px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .target-dH {
+    margin-left: auto;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  /* Step rows */
+  .step-row {
+    display: grid;
+    grid-template-columns: 28px 1fr auto auto auto;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: border-color 0.2s;
+  }
+
+  .step-row:hover {
+    border-color: var(--accent);
+  }
+
+  .step-num {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .eq-display {
+    font-family: var(--mono);
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .eq-dH {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--accent2);
+    white-space: nowrap;
+  }
+
+  .op-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 140px;
+  }
+
+  .op-group label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .op-group select, .op-group input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    padding: 5px 8px;
+    width: 100%;
+    outline: none;
+  }
+
+  .op-group select:focus, .op-group input:focus {
+    border-color: var(--accent);
+  }
+
+  .factor-input {
+    width: 70px !important;
+  }
+
+  /* Cancellation display */
+  .cancellation-area {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 16px;
+    line-height: 2;
+  }
+
+  .species {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin: 1px;
+    transition: all 0.3s;
+  }
+
+  .species.cancelled {
+    text-decoration: line-through;
+    opacity: 0.35;
+    background: rgba(248,113,113,0.15);
+    color: var(--red);
+  }
+
+  .color-0 { background: rgba(108,139,239,0.15); color: #8ba8ff; border: 1px solid rgba(108,139,239,0.3); }
+  .color-1 { background: rgba(167,139,250,0.15); color: #c4b0ff; border: 1px solid rgba(167,139,250,0.3); }
+  .color-2 { background: rgba(52,211,153,0.15); color: #6edcb5; border: 1px solid rgba(52,211,153,0.3); }
+  .color-3 { background: rgba(251,191,36,0.15); color: #fcd47a; border: 1px solid rgba(251,191,36,0.3); }
+  .color-4 { background: rgba(248,113,113,0.15); color: #ff9e9e; border: 1px solid rgba(248,113,113,0.3); }
+  .color-5 { background: rgba(45,212,191,0.15); color: #5eead4; border: 1px solid rgba(45,212,191,0.3); }
+
+  .arrow {
+    color: var(--accent);
+    margin: 0 6px;
+  }
+
+  .plus { color: var(--muted); margin: 0 3px; }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+  }
+
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover { border-color: var(--accent); }
+
+  .btn-new {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+
+  .btn-new:hover { background: rgba(108,139,239,0.1); }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  /* Result */
+  .result-box {
+    padding: 16px;
+    border-radius: 8px;
+    margin-top: 16px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .result-correct {
+    background: rgba(52,211,153,0.1);
+    border: 1px solid rgba(52,211,153,0.4);
+    color: var(--green);
+  }
+
+  .result-wrong {
+    background: rgba(248,113,113,0.1);
+    border: 1px solid rgba(248,113,113,0.4);
+    color: var(--red);
+  }
+
+  .result-info {
+    background: rgba(108,139,239,0.1);
+    border: 1px solid rgba(108,139,239,0.3);
+    color: #a5b8ff;
+  }
+
+  .solution-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 12px;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    line-height: 1.8;
+    color: var(--muted);
+    display: none;
+  }
+
+  .solution-block.visible { display: block; }
+
+  .sol-line { margin: 4px 0; }
+  .sol-step { color: var(--accent); }
+  .sol-eq { color: var(--text); }
+  .sol-dH { color: var(--accent2); }
+
+  .dH-sum-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-top: 8px;
+    font-family: var(--mono);
+    font-size: 0.9rem;
+  }
+
+  .dH-sum-label { color: var(--muted); }
+  .dH-sum-value { color: var(--accent2); font-weight: 600; }
+
+  .progress-pill {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .legend-item {
+    font-size: 0.75rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 12px 0;
+  }
+
+  @media (max-width: 640px) {
+    .step-row {
+      grid-template-columns: 1fr;
+    }
+    .target-eq { font-size: 0.9rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Satz von Hess</h1>
+    <p>Kombiniere die Teilreaktionen, um die Zielreaktion zu erhalten</p>
+  </header>
+
+  <div class="card">
+    <div class="card-title">Zielreaktion <span class="progress-pill" id="progress">Aufgabe 1</span></div>
+    <div class="target-eq" id="target-display">–</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Teilreaktionen – Deine Operationen</div>
+    <div id="steps-container"></div>
+  </div>
+
+  <div class="card" id="cancellation-card">
+    <div class="card-title">Kürzungsschritt – Zusammenfassung</div>
+    <div class="legend" id="legend-box"></div>
+    <div class="cancellation-area" id="cancel-display"></div>
+    <div class="dH-sum-row">
+      <span class="dH-sum-label">ΔH<sub>Gesamt</sub> =</span>
+      <span class="dH-sum-value" id="dH-total">–</span>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="checkAnswer()">Überprüfen ✓</button>
+    <button class="btn btn-secondary" onclick="showSolution()">Lösung anzeigen</button>
+    <button class="btn btn-new" onclick="newQuestion()">Neue Aufgabe ↺</button>
+  </div>
+
+  <div id="result-area"></div>
+  <div class="solution-block" id="solution-block"></div>
+</div>
+
+<script>
+const reactions = [
+  {
+    name: "Verbrennung von Kohlenstoff zu CO₂",
+    target: { left: ["C(s)", "O₂(g)"], right: ["CO₂(g)"], dH: -393.5 },
+    steps: [
+      { left: ["2C(s)", "O₂(g)"], right: ["2CO(g)"], dH: -221.0 },
+      { left: ["2CO(g)", "O₂(g)"], right: ["2CO₂(g)"], dH: -566.0 },
+    ],
+    solution: [
+      { op: "multiply", factor: 0.5, idx: 0 },
+      { op: "multiply", factor: 0.5, idx: 1 },
+    ]
+  },
+  {
+    name: "Bildung von Wasser (flüssig)",
+    target: { left: ["H₂(g)", "½O₂(g)"], right: ["H₂O(l)"], dH: -285.8 },
+    steps: [
+      { left: ["H₂(g)", "½O₂(g)"], right: ["H₂O(g)"], dH: -241.8 },
+      { left: ["H₂O(g)"], right: ["H₂O(l)"], dH: -44.0 },
+    ],
+    solution: [
+      { op: "use", factor: 1, idx: 0 },
+      { op: "use", factor: 1, idx: 1 },
+    ]
+  },
+  {
+    name: "Bildung von SO₃",
+    target: { left: ["S(s)", "3/2 O₂(g)"], right: ["SO₃(g)"], dH: -395.7 },
+    steps: [
+      { left: ["S(s)", "O₂(g)"], right: ["SO₂(g)"], dH: -296.8 },
+      { left: ["2SO₂(g)", "O₂(g)"], right: ["2SO₃(g)"], dH: -197.8 },
+    ],
+    solution: [
+      { op: "use", factor: 1, idx: 0 },
+      { op: "multiply", factor: 0.5, idx: 1 },
+    ]
+  },
+  {
+    name: "Bildung von NO₂",
+    target: { left: ["N₂(g)", "2O₂(g)"], right: ["2NO₂(g)"], dH: 66.4 },
+    steps: [
+      { left: ["N₂(g)", "O₂(g)"], right: ["2NO(g)"], dH: 180.6 },
+      { left: ["2NO(g)", "O₂(g)"], right: ["2NO₂(g)"], dH: -114.2 },
+    ],
+    solution: [
+      { op: "use", factor: 1, idx: 0 },
+      { op: "use", factor: 1, idx: 1 },
+    ]
+  },
+  {
+    name: "Bildung von CH₄ (Methan)",
+    target: { left: ["C(s)", "2H₂(g)"], right: ["CH₄(g)"], dH: -74.8 },
+    steps: [
+      { left: ["C(s)", "O₂(g)"], right: ["CO₂(g)"], dH: -393.5 },
+      { left: ["H₂(g)", "½O₂(g)"], right: ["H₂O(l)"], dH: -285.8 },
+      { left: ["CH₄(g)", "2O₂(g)"], right: ["CO₂(g)", "2H₂O(l)"], dH: -890.3 },
+    ],
+    solution: [
+      { op: "use", factor: 1, idx: 0 },
+      { op: "multiply", factor: 2, idx: 1 },
+      { op: "reverse", factor: 1, idx: 2 },
+    ]
+  },
+  {
+    name: "Bildung von C₂H₅OH (Ethanol) aus Elementen",
+    target: { left: ["2C(s)", "3H₂(g)", "½O₂(g)"], right: ["C₂H₅OH(l)"], dH: -277.7 },
+    steps: [
+      { left: ["C(s)", "O₂(g)"], right: ["CO₂(g)"], dH: -393.5 },
+      { left: ["H₂(g)", "½O₂(g)"], right: ["H₂O(l)"], dH: -285.8 },
+      { left: ["C₂H₅OH(l)", "3O₂(g)"], right: ["2CO₂(g)", "3H₂O(l)"], dH: -1366.7 },
+    ],
+    solution: [
+      { op: "multiply", factor: 2, idx: 0 },
+      { op: "multiply", factor: 3, idx: 1 },
+      { op: "reverse", factor: 1, idx: 2 },
+    ]
+  },
+  {
+    name: "Hydrierung von Ethen zu Ethan",
+    target: { left: ["C₂H₄(g)", "H₂(g)"], right: ["C₂H₆(g)"], dH: -136.9 },
+    steps: [
+      { left: ["C₂H₄(g)", "3O₂(g)"], right: ["2CO₂(g)", "2H₂O(l)"], dH: -1411.2 },
+      { left: ["C₂H₆(g)", "7/2 O₂(g)"], right: ["2CO₂(g)", "3H₂O(l)"], dH: -1559.7 },
+      { left: ["H₂(g)", "½O₂(g)"], right: ["H₂O(l)"], dH: -285.8 },
+    ],
+    solution: [
+      { op: "use", factor: 1, idx: 0 },
+      { op: "reverse", factor: 1, idx: 1 },
+      { op: "use", factor: 1, idx: 2 },
+    ]
+  },
+  {
+    name: "Bildung von HCl(g)",
+    target: { left: ["½H₂(g)", "½Cl₂(g)"], right: ["HCl(g)"], dH: -92.3 },
+    steps: [
+      { left: ["H₂(g)", "Cl₂(g)"], right: ["2HCl(g)"], dH: -184.6 },
+    ],
+    solution: [
+      { op: "multiply", factor: 0.5, idx: 0 },
+    ]
+  },
+  {
+    name: "Bildung von NH₃",
+    target: { left: ["N₂(g)", "3H₂(g)"], right: ["2NH₃(g)"], dH: -92.4 },
+    steps: [
+      { left: ["N₂(g)", "O₂(g)"], right: ["2NO(g)"], dH: 180.6 },
+      { left: ["2NO(g)", "O₂(g)"], right: ["2NO₂(g)"], dH: -114.2 },
+      { left: ["4NH₃(g)", "7O₂(g)"], right: ["4NO₂(g)", "6H₂O(l)"], dH: -1132.0 },
+      { left: ["H₂(g)", "½O₂(g)"], right: ["H₂O(l)"], dH: -285.8 },
+    ],
+    solution: [
+      { op: "reverse", factor: 1, idx: 0 },
+      { op: "reverse", factor: 1, idx: 1 },
+      { op: "multiply", factor: 0.5, idx: 2, note: "dann umkehren" },
+      { op: "multiply", factor: 3, idx: 3 },
+    ]
+  },
+  {
+    name: "Bildung von CaCO₃ aus CaO und CO₂",
+    target: { left: ["CaO(s)", "CO₂(g)"], right: ["CaCO₃(s)"], dH: -178.3 },
+    steps: [
+      { left: ["Ca(s)", "½O₂(g)"], right: ["CaO(s)"], dH: -635.5 },
+      { left: ["C(s)", "O₂(g)"], right: ["CO₂(g)"], dH: -393.5 },
+      { left: ["Ca(s)", "C(s)", "3/2 O₂(g)"], right: ["CaCO₃(s)"], dH: -1207.3 },
+    ],
+    solution: [
+      { op: "reverse", factor: 1, idx: 0 },
+      { op: "reverse", factor: 1, idx: 1 },
+      { op: "use", factor: 1, idx: 2 },
+    ]
+  }
+];
+
+let current = null;
+let questionCount = 0;
+
+function newQuestion() {
+  questionCount++;
+  current = reactions[Math.floor(Math.random() * reactions.length)];
+  document.getElementById('progress').textContent = `Aufgabe ${questionCount}`;
+  document.getElementById('result-area').innerHTML = '';
+  document.getElementById('solution-block').classList.remove('visible');
+  document.getElementById('solution-block').innerHTML = '';
+  renderTarget();
+  renderSteps();
+  updateCancellation();
+}
+
+function renderTarget() {
+  const t = current.target;
+  const html = `<span>${t.left.join(' + ')}</span><span class="arrow">→</span><span>${t.right.join(' + ')}</span><span class="target-dH">ΔH = ${t.dH} kJ/mol</span>`;
+  document.getElementById('target-display').innerHTML = html;
+}
+
+function renderSteps() {
+  const c = document.getElementById('steps-container');
+  c.innerHTML = '';
+  current.steps.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'step-row';
+    row.innerHTML = `
+      <div class="step-num">${i+1}</div>
+      <div class="eq-display" id="eq-text-${i}">
+        ${s.left.join(' + ')} → ${s.right.join(' + ')}
+      </div>
+      <div class="eq-dH">ΔH = ${s.dH} kJ/mol</div>
+      <div class="op-group">
+        <label>Operation</label>
+        <select id="op-${i}" onchange="updateCancellation()">
+          <option value="none">– nicht verwenden –</option>
+          <option value="use">Direkt verwenden</option>
+          <option value="reverse">Umkehren</option>
+          <option value="multiply">Multiplizieren</option>
+          <option value="divide">Dividieren</option>
+          <option value="reverse_multiply">Umkehren + Mult.</option>
+        </select>
+      </div>
+      <div class="op-group">
+        <label>Faktor</label>
+        <input type="number" id="factor-${i}" value="1" min="0.1" step="0.5" class="factor-input" oninput="updateCancellation()">
+      </div>
+    `;
+    c.appendChild(row);
+  });
+}
+
+// Parse a species string to extract coefficient and name
+function parseSpecies(s) {
+  s = s.trim();
+  const m = s.match(/^(\d+\/\d+|\d*\.?\d+)?\s*(.+)$/);
+  let coeff = 1, name = s;
+  if (m) {
+    if (m[1]) {
+      if (m[1].includes('/')) {
+        const parts = m[1].split('/');
+        coeff = parseFloat(parts[0]) / parseFloat(parts[1]);
+      } else {
+        coeff = parseFloat(m[1]);
+      }
+    }
+    name = m[2];
+  }
+  return { coeff, name };
+}
+
+function applyOp(step, op, factor) {
+  let left = [...step.left];
+  let right = [...step.right];
+  let dH = step.dH;
+  let f = parseFloat(factor) || 1;
+
+  if (op === 'reverse' || op === 'reverse_multiply') {
+    [left, right] = [right, left];
+    dH = -dH;
+  }
+  if (op === 'multiply' || op === 'reverse_multiply') {
+    dH *= f;
+    left = left.map(s => scaleSpecies(s, f));
+    right = right.map(s => scaleSpecies(s, f));
+  }
+  if (op === 'divide') {
+    dH /= f;
+    left = left.map(s => scaleSpecies(s, 1/f));
+    right = right.map(s => scaleSpecies(s, 1/f));
+  }
+  return { left, right, dH };
+}
+
+function scaleSpecies(spec, factor) {
+  const { coeff, name } = parseSpecies(spec);
+  const newCoeff = coeff * factor;
+  if (Math.abs(newCoeff - 1) < 0.001) return name;
+  // Format nicely
+  if (newCoeff === Math.round(newCoeff)) return `${newCoeff}${name}`;
+  // Fraction?
+  const frac = toFraction(newCoeff);
+  return `${frac}${name}`;
+}
+
+function toFraction(val) {
+  const tolerance = 0.001;
+  for (let d = 1; d <= 12; d++) {
+    const n = Math.round(val * d);
+    if (Math.abs(n/d - val) < tolerance) {
+      if (d === 1) return `${n}`;
+      return `${n}/${d} `;
+    }
+  }
+  return val.toFixed(2);
+}
+
+function updateCancellation() {
+  if (!current) return;
+  const usedSteps = [];
+  current.steps.forEach((s, i) => {
+    const op = document.getElementById(`op-${i}`).value;
+    const factor = document.getElementById(`factor-${i}`).value;
+    if (op !== 'none') {
+      usedSteps.push({ ...applyOp(s, op, factor), idx: i });
+    }
+  });
+
+  // Collect all species with net amounts (left = negative, right = positive)
+  const netMap = {}; // name -> net amount (positive = product, negative = reactant)
+  let dHtotal = 0;
+
+  usedSteps.forEach(st => {
+    dHtotal += st.dH;
+    st.left.forEach(sp => {
+      const { coeff, name } = parseSpecies(sp);
+      netMap[name] = (netMap[name] || 0) - coeff;
+    });
+    st.right.forEach(sp => {
+      const { coeff, name } = parseSpecies(sp);
+      netMap[name] = (netMap[name] || 0) + coeff;
+    });
+  });
+
+  // Which species cancel (net ~0) vs survive as reactant (<0) or product (>0)
+  const cancelled = new Set();
+  const surviving = {};
+  Object.entries(netMap).forEach(([name, net]) => {
+    if (Math.abs(net) < 0.001) cancelled.add(name);
+    else surviving[name] = net;
+  });
+
+  // Assign colors to unique species
+  const allSpecies = Object.keys(netMap);
+  const colorMap = {};
+  allSpecies.forEach((sp, idx) => { colorMap[sp] = idx % 6; });
+
+  // Build cancellation HTML
+  const legendMap = {};
+  allSpecies.forEach(sp => { legendMap[sp] = colorMap[sp]; });
+
+  let html = '';
+  usedSteps.forEach((st, si) => {
+    html += `<div style="margin-bottom:4px">`;
+    html += st.left.map(sp => {
+      const { name } = parseSpecies(sp);
+      const cls = `species color-${colorMap[name]}${cancelled.has(name) ? ' cancelled' : ''}`;
+      return `<span class="${cls}">${sp}</span>`;
+    }).join(`<span class="plus"> + </span>`);
+    html += `<span class="arrow"> → </span>`;
+    html += st.right.map(sp => {
+      const { name } = parseSpecies(sp);
+      const cls = `species color-${colorMap[name]}${cancelled.has(name) ? ' cancelled' : ''}`;
+      return `<span class="${cls}">${sp}</span>`;
+    }).join(`<span class="plus"> + </span>`);
+    html += `<span style="color:var(--accent2);margin-left:14px;font-size:0.82rem">ΔH = ${round(st.dH)} kJ/mol</span>`;
+    html += `</div>`;
+  });
+
+  if (usedSteps.length === 0) {
+    html = '<span style="color:var(--muted)">Wähle mindestens eine Operation aus …</span>';
+  }
+
+  document.getElementById('cancel-display').innerHTML = html;
+
+  // ΔH total
+  document.getElementById('dH-total').textContent = usedSteps.length > 0
+    ? `${round(dHtotal)} kJ/mol`
+    : '–';
+
+  // Legend
+  let legHTML = '';
+  Object.entries(legendMap).forEach(([sp, c]) => {
+    legHTML += `<span class="legend-item color-${c}">${sp}</span>`;
+  });
+  document.getElementById('legend-box').innerHTML = legHTML;
+}
+
+function round(v) {
+  return Math.round(v * 10) / 10;
+}
+
+function checkAnswer() {
+  const usedSteps = [];
+  let anyUsed = false;
+  current.steps.forEach((s, i) => {
+    const op = document.getElementById(`op-${i}`).value;
+    const factor = document.getElementById(`factor-${i}`).value;
+    if (op !== 'none') {
+      anyUsed = true;
+      usedSteps.push({ ...applyOp(s, op, factor) });
+    }
+  });
+
+  if (!anyUsed) {
+    showResult('info', 'Bitte wähle mindestens eine Operation für eine Teilreaktion aus.');
+    return;
+  }
+
+  const netMap = {};
+  let dHtotal = 0;
+  usedSteps.forEach(st => {
+    dHtotal += st.dH;
+    st.left.forEach(sp => {
+      const { coeff, name } = parseSpecies(sp);
+      netMap[name] = (netMap[name] || 0) - coeff;
+    });
+    st.right.forEach(sp => {
+      const { coeff, name } = parseSpecies(sp);
+      netMap[name] = (netMap[name] || 0) + coeff;
+    });
+  });
+
+  // Check result matches target
+  const targetNet = {};
+  current.target.left.forEach(sp => {
+    const { coeff, name } = parseSpecies(sp);
+    targetNet[name] = (targetNet[name] || 0) - coeff;
+  });
+  current.target.right.forEach(sp => {
+    const { coeff, name } = parseSpecies(sp);
+    targetNet[name] = (targetNet[name] || 0) + coeff;
+  });
+
+  // Compare netMap vs targetNet
+  const allKeys = new Set([...Object.keys(netMap), ...Object.keys(targetNet)]);
+  let equMatch = true;
+  for (const k of allKeys) {
+    const got = netMap[k] || 0;
+    const want = targetNet[k] || 0;
+    if (Math.abs(got - want) > 0.05) { equMatch = false; break; }
+  }
+
+  const dHMatch = Math.abs(round(dHtotal) - current.target.dH) < 1.5;
+
+  if (equMatch && dHMatch) {
+    showResult('correct', `✓ Richtig! Die Gleichungen kombinieren sich korrekt zur Zielreaktion mit ΔH = ${round(dHtotal)} kJ/mol. Ausgezeichnet!`);
+  } else if (equMatch && !dHMatch) {
+    showResult('wrong', `Die Gleichungen ergeben die richtige Formel, aber ΔH stimmt nicht: Du erhältst ${round(dHtotal)} kJ/mol, korrekt wäre ${current.target.dH} kJ/mol. Überprüfe die Faktoren und Vorzeichen.`);
+  } else {
+    showResult('wrong', `Noch nicht korrekt. Die sich ergebende Reaktion stimmt nicht mit der Zielreaktion überein. Überprüfe, welche Gleichungen du verwendest und ob du sie umkehren oder skalieren musst.`);
+  }
+}
+
+function showResult(type, msg) {
+  const cls = type === 'correct' ? 'result-correct' : type === 'wrong' ? 'result-wrong' : 'result-info';
+  document.getElementById('result-area').innerHTML = `<div class="result-box ${cls}">${msg}</div>`;
+}
+
+function showSolution() {
+  const sol = document.getElementById('solution-block');
+  sol.classList.add('visible');
+  
+  const ops = { use: 'Direkt verwenden', reverse: 'Umkehren', multiply: 'Multiplizieren', divide: 'Dividieren', reverse_multiply: 'Umkehren + Multiplizieren' };
+  
+  let html = '<div class="sol-line" style="color:var(--accent);margin-bottom:8px;font-size:0.9rem">📋 Musterlösung</div>';
+  
+  let dHTotal = 0;
+  current.steps.forEach((s, i) => {
+    const applied = applyOp(s, 'use', 1);
+    html += `<div class="sol-line"><span class="sol-step">Gl. ${i+1}:</span> <span class="sol-eq">${s.left.join(' + ')} → ${s.right.join(' + ')},  ΔH = ${s.dH} kJ/mol</span></div>`;
+  });
+
+  html += `<div style="border-top:1px dashed var(--border);margin:12px 0"></div>`;
+  
+  // Show the correct combo
+  html += `<div class="sol-line" style="color:var(--accent);margin-bottom:4px">Korrekte Kombinationsschritte:</div>`;
+  current.solution.forEach(step => {
+    const s = current.steps[step.idx];
+    let desc = '';
+    if (step.op === 'use') desc = `Gleichung ${step.idx+1} direkt verwenden`;
+    else if (step.op === 'reverse') desc = `Gleichung ${step.idx+1} umkehren → ΔH wird negiert`;
+    else if (step.op === 'multiply') desc = `Gleichung ${step.idx+1} × ${step.factor} → ΔH × ${step.factor}`;
+    else if (step.op === 'reverse_multiply') desc = `Gleichung ${step.idx+1} umkehren und × ${step.factor}`;
+    const applied = applyOp(s, step.op, step.factor);
+    dHTotal += applied.dH;
+    html += `<div class="sol-line">→ <span class="sol-step">${desc}</span>: <span class="sol-eq">${applied.left.join(' + ')} → ${applied.right.join(' + ')}</span>  <span class="sol-dH">ΔH = ${round(applied.dH)} kJ/mol</span></div>`;
+  });
+
+  html += `<div style="border-top:1px dashed var(--border);margin:10px 0"></div>`;
+  html += `<div class="sol-line"><span style="color:var(--green)">Ergebnis: ΔH<sub>Gesamt</sub> = ${round(dHTotal)} kJ/mol ✓</span></div>`;
+  html += `<div style="margin-top:12px;color:var(--muted);font-size:0.8rem;font-family:Inter,sans-serif">
+    <strong style="color:var(--text)">Erklärung:</strong> Nach dem Satz von Hess ist die Reaktionsenthalpie wegunabhängig. 
+    Wir können Gleichungen addieren, subtrahieren (umkehren) und skalieren. 
+    Gleiche Stoffe auf beiden Seiten kürzen sich heraus. 
+    Die ΔH-Werte werden entsprechend addiert, negiert oder skaliert.
+  </div>`;
+  
+  sol.innerHTML = html;
+}
+
+newQuestion();
+</script>
+</body>
+</html>
