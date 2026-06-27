@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redoxreaktionen – Interaktive Übung</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0c0e14;
+    --surface: #141720;
+    --surface2: #1c1f2e;
+    --border: #272b40;
+    --ox-color: #f97316;
+    --red-color: #22d3ee;
+    --accent: #818cf8;
+    --green: #34d399;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--ox-color), var(--red-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  header p { color: var(--muted); margin-top: 6px; font-size: 0.9rem; }
+
+  .container { max-width: 960px; margin: 0 auto; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 18px;
+  }
+
+  .card-title {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  /* Unbalanced equation display */
+  .eq-raw {
+    font-family: var(--mono);
+    font-size: 1.05rem;
+    padding: 14px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .arrow-big { color: var(--accent); font-size: 1.2rem; margin: 0 8px; }
+
+  /* Oxidation number display */
+  .ox-number-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .atom-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: center;
+    min-width: 110px;
+  }
+
+  .atom-name {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .atom-side {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .ox-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    padding: 4px 8px;
+    width: 65px;
+    text-align: center;
+    outline: none;
+  }
+
+  .ox-input:focus { border-color: var(--accent); }
+  .ox-input.correct { border-color: var(--green); background: rgba(52,211,153,0.08); }
+  .ox-input.wrong { border-color: var(--red); background: rgba(248,113,113,0.08); }
+
+  /* Half-reactions */
+  .half-reaction-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 4px;
+  }
+
+  @media (max-width: 600px) { .half-reaction-grid { grid-template-columns: 1fr; } }
+
+  .half-card {
+    border-radius: 8px;
+    padding: 14px;
+  }
+
+  .half-card.oxidation {
+    background: rgba(249,115,22,0.07);
+    border: 1px solid rgba(249,115,22,0.3);
+  }
+
+  .half-card.reduction {
+    background: rgba(34,211,238,0.07);
+    border: 1px solid rgba(34,211,238,0.3);
+  }
+
+  .half-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .half-card.oxidation .half-label { color: var(--ox-color); }
+  .half-card.reduction .half-label { color: var(--red-color); }
+
+  .half-eq-display {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--text);
+    margin-bottom: 10px;
+    background: var(--bg);
+    padding: 8px 10px;
+    border-radius: 6px;
+  }
+
+  /* Arrow diagram */
+  .arrow-diagram {
+    position: relative;
+    padding: 30px 10px;
+    margin: 12px 0;
+    overflow: hidden;
+  }
+
+  .ad-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    margin: 10px 0;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+  }
+
+  .ad-species {
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-weight: 500;
+  }
+
+  .ad-ox { background: rgba(249,115,22,0.15); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); }
+  .ad-red { background: rgba(34,211,238,0.15); color: #67e8f9; border: 1px solid rgba(34,211,238,0.3); }
+
+  .ad-arrow-ox {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(249,115,22,0.6), rgba(249,115,22,0.3));
+    margin: 0 10px;
+    position: relative;
+  }
+
+  .ad-arrow-red {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(34,211,238,0.3), rgba(34,211,238,0.6));
+    margin: 0 10px;
+    position: relative;
+  }
+
+  .ad-arrow-label {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  .ox-lbl { color: var(--ox-color); }
+  .red-lbl { color: var(--red-color); }
+
+  .ad-arrow-ox::after, .ad-arrow-red::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -4px;
+    border: 5px solid transparent;
+  }
+  .ad-arrow-ox::after { border-left-color: rgba(249,115,22,0.6); }
+  .ad-arrow-red::after { border-left-color: rgba(34,211,238,0.6); }
+
+  /* Inputs */
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+    font-size: 0.85rem;
+    flex-wrap: wrap;
+  }
+
+  .input-row label { color: var(--muted); min-width: 130px; font-size: 0.8rem; }
+
+  .inline-input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    padding: 5px 10px;
+    width: 80px;
+    outline: none;
+    text-align: center;
+  }
+
+  .inline-input:focus { border-color: var(--accent); }
+  .inline-input.correct { border-color: var(--green); background: rgba(52,211,153,0.08); }
+  .inline-input.wrong { border-color: var(--red); background: rgba(248,113,113,0.08); }
+
+  .inline-input-wide { width: 200px; text-align: left; }
+
+  /* Final balanced equation */
+  .balanced-display {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 14px 18px;
+    line-height: 2;
+    color: var(--muted);
+  }
+
+  .balanced-display.has-content { color: var(--text); }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--ox-color), var(--red-color));
+    color: white;
+  }
+
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  .btn-secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover { border-color: var(--accent); }
+
+  .btn-new {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+
+  .btn-new:hover { background: rgba(129,140,248,0.1); }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .result-box {
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-top: 14px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+
+  .result-correct { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.4); color: #6ee7b7; }
+  .result-wrong { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.4); color: #fca5a5; }
+  .result-info { background: rgba(129,140,248,0.1); border: 1px solid rgba(129,140,248,0.3); color: #a5b4fc; }
+
+  .solution-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    margin-top: 12px;
+    font-size: 0.85rem;
+    line-height: 1.9;
+    display: none;
+  }
+
+  .solution-block.visible { display: block; }
+  .sol-h { color: var(--accent); font-weight: 600; margin-top: 8px; }
+  .sol-ox { color: var(--ox-color); }
+  .sol-red { color: var(--red-color); }
+  .sol-green { color: var(--green); }
+  .sol-mono { font-family: var(--mono); }
+
+  .milieu-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-left: 10px;
+  }
+
+  .milieu-acid { background: rgba(249,115,22,0.15); color: var(--ox-color); border: 1px solid rgba(249,115,22,0.3); }
+  .milieu-base { background: rgba(34,211,238,0.15); color: var(--red-color); border: 1px solid rgba(34,211,238,0.3); }
+
+  .section-divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 14px 0;
+  }
+
+  .tip-box {
+    background: rgba(129,140,248,0.07);
+    border: 1px solid rgba(129,140,248,0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  sub { font-size: 0.7em; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Redoxreaktionen</h1>
+    <p>Bestimme Oxidationszahlen, Halbgleichungen und gleiche die Reaktion aus</p>
+  </header>
+
+  <!-- Aufgabe -->
+  <div class="card">
+    <div class="card-title">Unausgeglichene Reaktionsgleichung</div>
+    <div class="eq-raw" id="eq-raw-display">–</div>
+    <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:0.8rem;color:var(--muted)">Milieu:</span>
+      <span class="milieu-badge" id="milieu-badge">–</span>
+    </div>
+  </div>
+
+  <!-- Schritt 1: Oxidationszahlen -->
+  <div class="card">
+    <div class="card-title">Schritt 1 – Oxidationszahlen bestimmen</div>
+    <div class="tip-box">Trage die Oxidationszahl für jedes Element/Ion auf beiden Seiten ein (z.B. +2, -1, 0). Drücke dann auf „Prüfen" um Feedback zu erhalten.</div>
+    <div class="ox-number-grid" id="ox-grid"></div>
+  </div>
+
+  <!-- Schritt 2: Elektronenübertragung -->
+  <div class="card">
+    <div class="card-title">Schritt 2 – Elektronenübertragung erkennen</div>
+    <div class="arrow-diagram" id="arrow-diagram"></div>
+    <div class="half-reaction-grid">
+      <div class="half-card oxidation">
+        <div class="half-label">⬆ Oxidation (gibt e⁻ ab)</div>
+        <div class="half-eq-display" id="ox-half-raw"></div>
+        <div class="input-row">
+          <label>Abgegebene e⁻:</label>
+          <input class="inline-input" id="ox-electrons" type="number" min="1" max="12" placeholder="?">
+        </div>
+        <div class="input-row">
+          <label>Faktor für Ausgleich:</label>
+          <input class="inline-input" id="ox-factor" type="number" min="1" max="12" placeholder="?">
+        </div>
+      </div>
+      <div class="half-card reduction">
+        <div class="half-label">⬇ Reduktion (nimmt e⁻ auf)</div>
+        <div class="half-eq-display" id="red-half-raw"></div>
+        <div class="input-row">
+          <label>Aufgenommene e⁻:</label>
+          <input class="inline-input" id="red-electrons" type="number" min="1" max="12" placeholder="?">
+        </div>
+        <div class="input-row">
+          <label>Faktor für Ausgleich:</label>
+          <input class="inline-input" id="red-factor" type="number" min="1" max="12" placeholder="?">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schritt 3: Ladungsausgleich -->
+  <div class="card">
+    <div class="card-title">Schritt 3 – Ladungs- und Stoffmengenausgleich</div>
+    <div id="balance-prompt" class="tip-box" style="margin-bottom:12px"></div>
+    <div class="input-row">
+      <label id="balance-ion-label">H⁺ / OH⁻ hinzufügen (Anzahl):</label>
+      <input class="inline-input" id="balance-ion-count" type="number" min="0" max="30" placeholder="?">
+    </div>
+    <div class="input-row">
+      <label>H₂O hinzufügen (Anzahl):</label>
+      <input class="inline-input" id="balance-h2o" type="number" min="0" max="30" placeholder="?">
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="checkAll()">Alles prüfen ✓</button>
+    <button class="btn btn-secondary" onclick="showSolution()">Lösung anzeigen</button>
+    <button class="btn btn-new" onclick="newQuestion()">Neue Aufgabe ↺</button>
+  </div>
+
+  <div id="result-area"></div>
+  <div class="solution-block" id="solution-block"></div>
+</div>
+
+<script>
+const reactions = [
+  {
+    name: "Permanganat + Eisenionen (sauer)",
+    raw: "MnO₄⁻ + Fe²⁺ → Mn²⁺ + Fe³⁺",
+    milieu: "saurer",
+    species: {
+      left: [
+        { formula: "MnO₄⁻", atoms: { "Mn": { ox: 7 }, "O": { ox: -2 } } },
+        { formula: "Fe²⁺", atoms: { "Fe": { ox: 2 } } }
+      ],
+      right: [
+        { formula: "Mn²⁺", atoms: { "Mn": { ox: 2 } } },
+        { formula: "Fe³⁺", atoms: { "Fe": { ox: 3 } } }
+      ]
+    },
+    oxidation: { species: "Fe²⁺", from: 2, to: 3, electrons: 1 },
+    reduction: { species: "MnO₄⁻", from: 7, to: 2, electrons: 5 },
+    oxHalf: "Fe²⁺ → Fe³⁺ + e⁻",
+    redHalf: "MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O",
+    oxFactor: 5,
+    redFactor: 1,
+    ionType: "H⁺",
+    ionCount: 8,
+    h2oCount: 4,
+    balanced: "MnO₄⁻ + 5Fe²⁺ + 8H⁺ → Mn²⁺ + 5Fe³⁺ + 4H₂O",
+    explanation: "Mn wird von +7 auf +2 reduziert (5 e⁻ aufgenommen). Fe wird von +2 auf +3 oxidiert (1 e⁻ abgegeben). Faktor 5 für Fe-Halbgleichung. Im sauren Milieu: O-Atome werden als H₂O gebunden, H wird durch H⁺ ausgeglichen."
+  },
+  {
+    name: "Dichromat + Iodid (sauer)",
+    raw: "Cr₂O₇²⁻ + I⁻ → Cr³⁺ + I₂",
+    milieu: "saurer",
+    species: {
+      left: [
+        { formula: "Cr₂O₇²⁻", atoms: { "Cr": { ox: 6 }, "O": { ox: -2 } } },
+        { formula: "I⁻", atoms: { "I": { ox: -1 } } }
+      ],
+      right: [
+        { formula: "Cr³⁺", atoms: { "Cr": { ox: 3 } } },
+        { formula: "I₂", atoms: { "I": { ox: 0 } } }
+      ]
+    },
+    oxidation: { species: "I⁻", from: -1, to: 0, electrons: 1 },
+    reduction: { species: "Cr₂O₇²⁻", from: 6, to: 3, electrons: 3 },
+    oxHalf: "2I⁻ → I₂ + 2e⁻",
+    redHalf: "Cr₂O₇²⁻ + 14H⁺ + 6e⁻ → 2Cr³⁺ + 7H₂O",
+    oxFactor: 3,
+    redFactor: 1,
+    ionType: "H⁺",
+    ionCount: 14,
+    h2oCount: 7,
+    balanced: "Cr₂O₇²⁻ + 6I⁻ + 14H⁺ → 2Cr³⁺ + 3I₂ + 7H₂O",
+    explanation: "Cr(+6) wird zu Cr(+3) reduziert, Δ = 3 e⁻ pro Cr, 6 e⁻ für beide Cr-Atome. I(-1) wird zu I₂(0) oxidiert, 2I⁻ geben 2 e⁻ ab, Faktor 3 nötig. Im sauren Milieu mit H⁺ und H₂O abgleichen."
+  },
+  {
+    name: "Zink + Salpetersäure (sauer)",
+    raw: "Zn + NO₃⁻ → Zn²⁺ + NH₄⁺",
+    milieu: "saurer",
+    species: {
+      left: [
+        { formula: "Zn", atoms: { "Zn": { ox: 0 } } },
+        { formula: "NO₃⁻", atoms: { "N": { ox: 5 }, "O": { ox: -2 } } }
+      ],
+      right: [
+        { formula: "Zn²⁺", atoms: { "Zn": { ox: 2 } } },
+        { formula: "NH₄⁺", atoms: { "N": { ox: -3 }, "H": { ox: 1 } } }
+      ]
+    },
+    oxidation: { species: "Zn", from: 0, to: 2, electrons: 2 },
+    reduction: { species: "NO₃⁻", from: 5, to: -3, electrons: 8 },
+    oxHalf: "Zn → Zn²⁺ + 2e⁻",
+    redHalf: "NO₃⁻ + 10H⁺ + 8e⁻ → NH₄⁺ + 3H₂O",
+    oxFactor: 4,
+    redFactor: 1,
+    ionType: "H⁺",
+    ionCount: 10,
+    h2oCount: 3,
+    balanced: "4Zn + NO₃⁻ + 10H⁺ → 4Zn²⁺ + NH₄⁺ + 3H₂O",
+    explanation: "Zn(0) → Zn(+2): 2 e⁻ abgegeben. N(+5) → N(-3): 8 e⁻ aufgenommen. kgV(2,8) = 8, daher Faktor 4 für Zn. Im sauren Milieu wird mit H⁺ und H₂O ausgeglichen."
+  },
+  {
+    name: "Permanganat + Oxalat (sauer)",
+    raw: "MnO₄⁻ + C₂O₄²⁻ → Mn²⁺ + CO₂",
+    milieu: "saurer",
+    species: {
+      left: [
+        { formula: "MnO₄⁻", atoms: { "Mn": { ox: 7 }, "O": { ox: -2 } } },
+        { formula: "C₂O₄²⁻", atoms: { "C": { ox: 3 }, "O": { ox: -2 } } }
+      ],
+      right: [
+        { formula: "Mn²⁺", atoms: { "Mn": { ox: 2 } } },
+        { formula: "CO₂", atoms: { "C": { ox: 4 }, "O": { ox: -2 } } }
+      ]
+    },
+    oxidation: { species: "C₂O₄²⁻", from: 3, to: 4, electrons: 2 },
+    reduction: { species: "MnO₄⁻", from: 7, to: 2, electrons: 5 },
+    oxHalf: "C₂O₄²⁻ → 2CO₂ + 2e⁻",
+    redHalf: "MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O",
+    oxFactor: 5,
+    redFactor: 2,
+    ionType: "H⁺",
+    ionCount: 16,
+    h2oCount: 8,
+    balanced: "2MnO₄⁻ + 5C₂O₄²⁻ + 16H⁺ → 2Mn²⁺ + 10CO₂ + 8H₂O",
+    explanation: "Mn(+7)→Mn(+2): 5 e⁻. C(+3)→C(+4): 1 e⁻ pro C-Atom, 2 e⁻ pro C₂O₄²⁻. kgV(5,2)=10 → Faktor 2 für MnO₄⁻, Faktor 5 für C₂O₄²⁻."
+  },
+  {
+    name: "Chlor + Natronlauge (basisch)",
+    raw: "Cl₂ + OH⁻ → Cl⁻ + ClO⁻",
+    milieu: "basischer",
+    species: {
+      left: [
+        { formula: "Cl₂", atoms: { "Cl": { ox: 0 } } },
+        { formula: "OH⁻", atoms: { "O": { ox: -2 }, "H": { ox: 1 } } }
+      ],
+      right: [
+        { formula: "Cl⁻", atoms: { "Cl": { ox: -1 } } },
+        { formula: "ClO⁻", atoms: { "Cl": { ox: 1 }, "O": { ox: -2 } } }
+      ]
+    },
+    oxidation: { species: "Cl₂ (→ ClO⁻)", from: 0, to: 1, electrons: 1 },
+    reduction: { species: "Cl₂ (→ Cl⁻)", from: 0, to: -1, electrons: 1 },
+    oxHalf: "Cl₂ + 2OH⁻ → 2ClO⁻ + 2H⁺ + 2e⁻",
+    redHalf: "Cl₂ + 2e⁻ → 2Cl⁻",
+    oxFactor: 1,
+    redFactor: 1,
+    ionType: "OH⁻",
+    ionCount: 2,
+    h2oCount: 1,
+    balanced: "Cl₂ + 2OH⁻ → Cl⁻ + ClO⁻ + H₂O",
+    explanation: "Dies ist eine Disproportionierung: Cl₂ wird gleichzeitig oxidiert (0→+1, ClO⁻) und reduziert (0→-1, Cl⁻). Im basischen Milieu wird mit OH⁻ und H₂O ausgeglichen."
+  },
+  {
+    name: "Wasserstoffperoxid + Iodid (sauer)",
+    raw: "H₂O₂ + I⁻ → I₂ + H₂O",
+    milieu: "saurer",
+    species: {
+      left: [
+        { formula: "H₂O₂", atoms: { "H": { ox: 1 }, "O": { ox: -1 } } },
+        { formula: "I⁻", atoms: { "I": { ox: -1 } } }
+      ],
+      right: [
+        { formula: "I₂", atoms: { "I": { ox: 0 } } },
+        { formula: "H₂O", atoms: { "H": { ox: 1 }, "O": { ox: -2 } } }
+      ]
+    },
+    oxidation: { species: "I⁻", from: -1, to: 0, electrons: 1 },
+    reduction: { species: "H₂O₂", from: -1, to: -2, electrons: 1 },
+    oxHalf: "2I⁻ → I₂ + 2e⁻",
+    redHalf: "H₂O₂ + 2H⁺ + 2e⁻ → 2H₂O",
+    oxFactor: 1,
+    redFactor: 1,
+    ionType: "H⁺",
+    ionCount: 2,
+    h2oCount: 2,
+    balanced: "H₂O₂ + 2I⁻ + 2H⁺ → I₂ + 2H₂O",
+    explanation: "O in H₂O₂ hat OZ -1, wird zu -2 (H₂O) reduziert → 2 e⁻ aufgenommen. I(-1) → I₂(0) oxidiert, 2I⁻ geben 2 e⁻ ab. Faktoren sind gleich (1:1). Im sauren Milieu mit H⁺ ausgleichen."
+  },
+  {
+    name: "Kupfer + Salpetersäure konz. (sauer)",
+    raw: "Cu + NO₃⁻ → Cu²⁺ + NO₂",
+    milieu: "saurer",
+    species: {
+      left: [
+        { formula: "Cu", atoms: { "Cu": { ox: 0 } } },
+        { formula: "NO₃⁻", atoms: { "N": { ox: 5 }, "O": { ox: -2 } } }
+      ],
+      right: [
+        { formula: "Cu²⁺", atoms: { "Cu": { ox: 2 } } },
+        { formula: "NO₂", atoms: { "N": { ox: 4 }, "O": { ox: -2 } } }
+      ]
+    },
+    oxidation: { species: "Cu", from: 0, to: 2, electrons: 2 },
+    reduction: { species: "NO₃⁻", from: 5, to: 4, electrons: 1 },
+    oxHalf: "Cu → Cu²⁺ + 2e⁻",
+    redHalf: "NO₃⁻ + 2H⁺ + e⁻ → NO₂ + H₂O",
+    oxFactor: 1,
+    redFactor: 2,
+    ionType: "H⁺",
+    ionCount: 4,
+    h2oCount: 2,
+    balanced: "Cu + 2NO₃⁻ + 4H⁺ → Cu²⁺ + 2NO₂ + 2H₂O",
+    explanation: "Cu(0)→Cu(+2): 2 e⁻ abgegeben. N(+5)→N(+4): 1 e⁻ aufgenommen. kgV=2 → Faktor 2 für NO₃⁻. Im sauren Milieu."
+  },
+  {
+    name: "Permanganat + H₂O₂ (sauer)",
+    raw: "MnO₄⁻ + H₂O₂ → Mn²⁺ + O₂",
+    milieu: "saurer",
+    species: {
+      left: [
+        { formula: "MnO₄⁻", atoms: { "Mn": { ox: 7 }, "O": { ox: -2 } } },
+        { formula: "H₂O₂", atoms: { "H": { ox: 1 }, "O": { ox: -1 } } }
+      ],
+      right: [
+        { formula: "Mn²⁺", atoms: { "Mn": { ox: 2 } } },
+        { formula: "O₂", atoms: { "O": { ox: 0 } } }
+      ]
+    },
+    oxidation: { species: "H₂O₂", from: -1, to: 0, electrons: 2 },
+    reduction: { species: "MnO₄⁻", from: 7, to: 2, electrons: 5 },
+    oxHalf: "H₂O₂ → O₂ + 2H⁺ + 2e⁻",
+    redHalf: "MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O",
+    oxFactor: 5,
+    redFactor: 2,
+    ionType: "H⁺",
+    ionCount: 6,
+    h2oCount: 8,
+    balanced: "2MnO₄⁻ + 5H₂O₂ + 6H⁺ → 2Mn²⁺ + 5O₂ + 8H₂O",
+    explanation: "O(-1) in H₂O₂ → O₂(0): 2 e⁻ abgegeben. Mn(+7)→Mn(+2): 5 e⁻ aufgenommen. kgV(2,5)=10 → Faktor 5 für H₂O₂, Faktor 2 für MnO₄⁻."
+  },
+  {
+    name: "Aluminium + OH⁻ (basisch)",
+    raw: "Al + OH⁻ → AlO₂⁻ + H₂",
+    milieu: "basischer",
+    species: {
+      left: [
+        { formula: "Al", atoms: { "Al": { ox: 0 } } },
+        { formula: "OH⁻", atoms: { "O": { ox: -2 }, "H": { ox: 1 } } }
+      ],
+      right: [
+        { formula: "AlO₂⁻", atoms: { "Al": { ox: 3 }, "O": { ox: -2 } } },
+        { formula: "H₂", atoms: { "H": { ox: 0 } } }
+      ]
+    },
+    oxidation: { species: "Al", from: 0, to: 3, electrons: 3 },
+    reduction: { species: "H₂O / OH⁻", from: 1, to: 0, electrons: 1 },
+    oxHalf: "Al + 4OH⁻ → AlO₂⁻ + 2H₂O + 3e⁻",
+    redHalf: "2H₂O + 2e⁻ → H₂ + 2OH⁻",
+    oxFactor: 2,
+    redFactor: 3,
+    ionType: "OH⁻",
+    ionCount: 2,
+    h2oCount: 2,
+    balanced: "2Al + 2OH⁻ + 2H₂O → 2AlO₂⁻ + 3H₂",
+    explanation: "Al(0)→Al(+3): 3 e⁻ abgegeben. H(+1)→H₂(0): 1 e⁻ pro H. kgV(3,2)=6 → Faktor 2 für Al, Faktor 3 für H₂-Halbgleichung. Im basischen Milieu mit OH⁻ und H₂O ausgleichen."
+  },
+  {
+    name: "Brom + Natronlauge (basisch, heiß)",
+    raw: "Br₂ + OH⁻ → Br⁻ + BrO₃⁻",
+    milieu: "basischer",
+    species: {
+      left: [
+        { formula: "Br₂", atoms: { "Br": { ox: 0 } } },
+        { formula: "OH⁻", atoms: { "O": { ox: -2 }, "H": { ox: 1 } } }
+      ],
+      right: [
+        { formula: "Br⁻", atoms: { "Br": { ox: -1 } } },
+        { formula: "BrO₃⁻", atoms: { "Br": { ox: 5 }, "O": { ox: -2 } } }
+      ]
+    },
+    oxidation: { species: "Br₂ (→ BrO₃⁻)", from: 0, to: 5, electrons: 5 },
+    reduction: { species: "Br₂ (→ Br⁻)", from: 0, to: -1, electrons: 1 },
+    oxHalf: "Br₂ + 12OH⁻ → 2BrO₃⁻ + 6H₂O + 10e⁻",
+    redHalf: "Br₂ + 2e⁻ → 2Br⁻",
+    oxFactor: 1,
+    redFactor: 5,
+    ionType: "OH⁻",
+    ionCount: 12,
+    h2oCount: 6,
+    balanced: "3Br₂ + 6OH⁻ → 5Br⁻ + BrO₃⁻ + 3H₂O",
+    explanation: "Disproportionierung von Br₂: Teil wird zu Br⁻ reduziert (-1), Teil zu BrO₃⁻ oxidiert (+5). Im basischen Milieu mit OH⁻ ausgleichen."
+  }
+];
+
+let current = null;
+let qCount = 0;
+
+function newQuestion() {
+  qCount++;
+  current = reactions[Math.floor(Math.random() * reactions.length)];
+  document.getElementById('result-area').innerHTML = '';
+  document.getElementById('solution-block').classList.remove('visible');
+  document.getElementById('solution-block').innerHTML = '';
+  renderAll();
+}
+
+function renderAll() {
+  // Raw equation
+  const parts = current.raw.split('→');
+  document.getElementById('eq-raw-display').innerHTML =
+    `<span>${parts[0].trim()}</span><span class="arrow-big">→</span><span>${parts[1].trim()}</span>`;
+
+  // Milieu badge
+  const badge = document.getElementById('milieu-badge');
+  badge.textContent = current.milieu === 'saurer' ? 'Sauer (H⁺)' : 'Basisch (OH⁻)';
+  badge.className = 'milieu-badge ' + (current.milieu === 'saurer' ? 'milieu-acid' : 'milieu-base');
+
+  // Oxidation number grid
+  renderOxGrid();
+
+  // Arrow diagram
+  renderArrowDiagram();
+
+  // Half reaction displays
+  document.getElementById('ox-half-raw').textContent = current.oxHalf;
+  document.getElementById('red-half-raw').textContent = current.redHalf;
+
+  // Clear inputs
+  ['ox-electrons','ox-factor','red-electrons','red-factor','balance-ion-count','balance-h2o'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.className = el.className.replace(' correct', '').replace(' wrong', ''); }
+  });
+
+  // Balance prompt
+  const ionLabel = current.milieu === 'saurer' ? 'H⁺' : 'OH⁻';
+  document.getElementById('balance-ion-label').textContent = `${ionLabel} hinzufügen (Anzahl):`;
+  document.getElementById('balance-prompt').innerHTML =
+    `Im <strong>${current.milieu}</strong> Milieu: O-Atome werden durch ${current.milieu === 'saurer' ? 'H₂O ausgeglichen, H durch H⁺' : 'OH⁻ ausgeglichen, H durch H₂O'}. Wie viele ${ionLabel} und H₂O werden benötigt?`;
+}
+
+function renderOxGrid() {
+  const grid = document.getElementById('ox-grid');
+  grid.innerHTML = '';
+  const makeBoxes = (side, sideLabel) => {
+    current.species[side].forEach(sp => {
+      Object.entries(sp.atoms).forEach(([atom, info]) => {
+        const box = document.createElement('div');
+        box.className = 'atom-box';
+        box.innerHTML = `
+          <div class="atom-name">${atom} in ${sp.formula}</div>
+          <div class="atom-side">${sideLabel}</div>
+          <input class="ox-input" id="ox-${side}-${atom}-${sp.formula.replace(/[^a-zA-Z0-9]/g,'')}"
+                 type="text" placeholder="?" data-correct="${info.ox}">
+        `;
+        grid.appendChild(box);
+      });
+    });
+  };
+  makeBoxes('left', '(Eduktseite)');
+  makeBoxes('right', '(Produktseite)');
+}
+
+function renderArrowDiagram() {
+  const d = document.getElementById('arrow-diagram');
+  const ox = current.oxidation;
+  const red = current.reduction;
+  d.innerHTML = `
+    <div class="ad-row">
+      <span class="ad-species ad-ox">${ox.species}</span>
+      <div class="ad-arrow-ox">
+        <div class="ad-arrow-label ox-lbl">OZ: ${ox.from > 0 ? '+' : ''}${ox.from} → ${ox.to > 0 ? '+' : ''}${ox.to}<br>gibt ${ox.electrons} e⁻ ab</div>
+      </div>
+      <span class="ad-species ad-ox">Oxidiert</span>
+    </div>
+    <div style="height:18px"></div>
+    <div class="ad-row">
+      <span class="ad-species ad-red">${red.species}</span>
+      <div class="ad-arrow-red">
+        <div class="ad-arrow-label red-lbl">OZ: ${red.from > 0 ? '+' : ''}${red.from} → ${red.to > 0 ? '+' : ''}${red.to}<br>nimmt ${red.electrons} e⁻ auf</div>
+      </div>
+      <span class="ad-species ad-red">Reduziert</span>
+    </div>
+  `;
+}
+
+function checkAll() {
+  let totalCorrect = 0, totalFields = 0;
+  let errors = [];
+
+  // Check ox numbers
+  document.querySelectorAll('.ox-input').forEach(inp => {
+    const val = parseFloat(inp.value);
+    const correct = parseFloat(inp.dataset.correct);
+    totalFields++;
+    if (!isNaN(val) && Math.abs(val - correct) < 0.1) {
+      inp.classList.remove('wrong'); inp.classList.add('correct');
+      totalCorrect++;
+    } else {
+      inp.classList.remove('correct'); inp.classList.add('wrong');
+      errors.push(`Oxidationszahl für ein Atom stimmt nicht (Eingabe: ${inp.value}, korrekt: ${correct >= 0 ? '+' : ''}${correct})`);
+    }
+  });
+
+  // Check electrons
+  const oxEl = parseInt(document.getElementById('ox-electrons').value);
+  const redEl = parseInt(document.getElementById('red-electrons').value);
+  const oxFac = parseInt(document.getElementById('ox-factor').value);
+  const redFac = parseInt(document.getElementById('red-factor').value);
+
+  const checkField = (id, correct, label) => {
+    const el = document.getElementById(id);
+    const val = parseInt(el.value);
+    totalFields++;
+    if (val === correct) {
+      el.classList.remove('wrong'); el.classList.add('correct');
+      totalCorrect++;
+    } else {
+      el.classList.remove('correct'); el.classList.add('wrong');
+      errors.push(`${label}: Eingabe ${val}, korrekt: ${correct}`);
+    }
+  };
+
+  checkField('ox-electrons', current.oxidation.electrons, 'Abgegebene e⁻ (Oxidation)');
+  checkField('red-electrons', current.reduction.electrons, 'Aufgenommene e⁻ (Reduktion)');
+  checkField('ox-factor', current.oxFactor, 'Faktor Oxidation');
+  checkField('red-factor', current.redFactor, 'Faktor Reduktion');
+  checkField('balance-ion-count', current.ionCount, `Anzahl ${current.ionType}`);
+  checkField('balance-h2o', current.h2oCount, 'Anzahl H₂O');
+
+  if (errors.length === 0) {
+    document.getElementById('result-area').innerHTML = `
+      <div class="result-box result-correct">
+        ✓ Alle Felder korrekt! Ausgeglichene Gleichung:<br>
+        <strong style="font-family:var(--mono)">${current.balanced}</strong>
+      </div>`;
+  } else {
+    document.getElementById('result-area').innerHTML = `
+      <div class="result-box result-wrong">
+        ${totalCorrect} von ${totalFields} Feldern korrekt. Fehler:<br>
+        ${errors.map(e => `• ${e}`).join('<br>')}
+      </div>`;
+  }
+}
+
+function showSolution() {
+  const sol = document.getElementById('solution-block');
+  sol.classList.add('visible');
+  const ox = current.oxidation;
+  const red = current.reduction;
+  sol.innerHTML = `
+    <div class="sol-h">📋 Vollständige Lösung</div>
+    <div style="margin-top:12px">
+      <div class="sol-h" style="font-size:0.8rem">Schritt 1 – Oxidationszahlen</div>
+      <div style="margin-top:6px;font-family:var(--mono);font-size:0.83rem;color:var(--muted)">
+        ${[...current.species.left, ...current.species.right].map(sp =>
+          Object.entries(sp.atoms).map(([a, i]) =>
+            `<span>${a} in ${sp.formula}: <span class="sol-green">${i.ox >= 0 ? '+' : ''}${i.ox}</span></span>`
+          ).join('  ')
+        ).join('<br>')}
+      </div>
+    </div>
+    <hr class="section-divider" style="border-color:var(--border);margin:12px 0">
+    <div class="sol-h" style="font-size:0.8rem">Schritt 2 – Elektronenübertragung</div>
+    <div style="margin-top:6px;font-size:0.83rem">
+      <span class="sol-ox">Oxidation: ${ox.species} → OZ ${ox.from >= 0 ? '+' : ''}${ox.from} → ${ox.to >= 0 ? '+' : ''}${ox.to}, gibt ${ox.electrons} e⁻ ab</span><br>
+      <span class="sol-red">Reduktion: ${red.species} → OZ ${red.from >= 0 ? '+' : ''}${red.from} → ${red.to >= 0 ? '+' : ''}${red.to}, nimmt ${red.electrons} e⁻ auf</span><br><br>
+      <span class="sol-mono sol-ox">Oxidations-Halbgl. (×${current.oxFactor}): ${current.oxHalf}</span><br>
+      <span class="sol-mono sol-red">Reduktions-Halbgl. (×${current.redFactor}): ${current.redHalf}</span>
+    </div>
+    <hr class="section-divider" style="border-color:var(--border);margin:12px 0">
+    <div class="sol-h" style="font-size:0.8rem">Schritt 3 – Ladungsausgleich im ${current.milieu} Milieu</div>
+    <div style="margin-top:6px;font-size:0.83rem;color:var(--muted)">
+      ${current.ionCount} × ${current.ionType} und ${current.h2oCount} × H₂O werden benötigt
+    </div>
+    <hr class="section-divider" style="border-color:var(--border);margin:12px 0">
+    <div class="sol-h" style="font-size:0.8rem">Ausgeglichene Gleichung</div>
+    <div style="font-family:var(--mono);font-size:0.95rem;color:var(--green);margin-top:6px">${current.balanced}</div>
+    <hr class="section-divider" style="border-color:var(--border);margin:12px 0">
+    <div class="sol-h" style="font-size:0.8rem">Erklärung</div>
+    <div style="margin-top:6px;font-size:0.83rem;color:var(--muted);line-height:1.7">${current.explanation}</div>
+  `;
+}
+
+newQuestion();
+</script>
+</body>
+</html>
